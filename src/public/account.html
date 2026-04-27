@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Smart Travel Account</title>
+
+<style>
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:rgba(15,23,42,.12);
+  --primary:#2563eb;
+  --primary2:#1d4ed8;
+  --danger:#dc2626;
+  --danger2:#b91c1c;
+  --radius:16px;
+  --shadow:0 12px 30px rgba(0,0,0,0.08);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+header{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:16px 28px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.brand{
+  font-weight:900;
+  font-size:18px;
+}
+
+.logout{
+  background:var(--danger);
+  color:#fff;
+  border:none;
+  padding:8px 14px;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.container{
+  max-width:1100px;
+  margin:30px auto;
+  padding:0 20px;
+}
+
+.welcome{
+  margin-bottom:20px;
+}
+
+.welcome h2{
+  margin:0 0 8px;
+}
+
+.welcome p{
+  color:var(--muted);
+  margin:0;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+
+button, .btn{
+  background:linear-gradient(135deg,var(--primary),var(--primary2));
+  color:#fff;
+  border:none;
+  padding:10px 16px;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:800;
+  font-size:14px;
+  text-decoration:none;
+}
+
+.btn.danger{
+  background:linear-gradient(135deg,var(--danger),var(--danger2));
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+.section{
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+
+.section h3{
+  margin-top:0;
+}
+
+.full{
+  grid-column:1 / -1;
+}
+
+.card{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  margin-bottom:10px;
+  background:#fafafa;
+}
+
+.card strong{
+  font-size:15px;
+}
+
+.small{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+.removeBtn{
+  margin-top:8px;
+  background:#fff;
+  color:var(--text);
+  border:1px solid var(--border);
+  padding:6px 10px;
+  border-radius:999px;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:700;
+}
+
+.empty{
+  color:var(--muted);
+  font-size:14px;
+}
+
+@media (max-width: 760px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">✈ Smart Travel</div>
+  <button id="logoutBtn" class="logout">Logout</button>
+</header>
+
+<div class="container">
+
+  <div class="welcome">
+    <h2>Welcome 👋</h2>
+    <p id="userEmail">Loading profile...</p>
+  </div>
+
+  <div class="actions">
+    <a href="/explore.html" class="btn">Explore Destinations</a>
+    <button id="loadFavs">Refresh Favourites</button>
+    <button id="loadHistory">Refresh History</button>
+    <button id="loadRecommended">Refresh Recommendations</button>
+    <button id="clearHistoryBtn" class="btn danger">Clear History</button>
+  </div>
+
+  <div class="grid">
+    <div class="section">
+      <h3>⭐ Your Favourites</h3>
+      <div id="favourites" class="empty">Loading favourites...</div>
+    </div>
+
+    <div class="section">
+      <h3>📜 Search History</h3>
+      <div id="history" class="empty">Loading history...</div>
+    </div>
+
+    <div class="section full">
+      <h3>🎯 Recommended For You</h3>
+      <div id="recommended" class="empty">Loading personalised recommendations...</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="api.js"></script>
+<script src="account.js"></script>
+</body>
+</html>

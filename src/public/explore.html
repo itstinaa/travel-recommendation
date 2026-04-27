@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Explore • Smart Travel</title>
+
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:rgba(15,23,42,.12);
+      --primary:#2563eb;
+      --primary2:#1d4ed8;
+      --ring:0 0 0 4px rgba(37,99,235,.18);
+      --shadow:0 18px 40px rgba(15,23,42,.10);
+      --r:20px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    header{
+      background:#fff;
+      border-bottom:1px solid var(--border);
+      padding:14px 24px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:950;
+    }
+
+    .logo{
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--primary),#60a5fa);
+      display:grid;
+      place-items:center;
+      color:#fff;
+      font-weight:900;
+    }
+
+    .btn{
+      padding:8px 14px;
+      border-radius:999px;
+      border:none;
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    .btn.primary{
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      color:#fff;
+      box-shadow:0 12px 24px rgba(37,99,235,.25);
+    }
+
+    .btn.secondary{
+      background:#fff;
+      border:1px solid var(--border);
+    }
+
+    main{
+      max-width:1000px;
+      margin:30px auto;
+      padding:0 20px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      padding:20px;
+      margin-bottom:20px;
+    }
+
+    h2{
+      margin-top:0;
+      letter-spacing:-.3px;
+    }
+
+    label{
+      display:block;
+      margin-top:14px;
+      font-size:13px;
+      font-weight:900;
+      color:rgba(15,23,42,.75);
+    }
+
+    select, input{
+      width:100%;
+      padding:10px 12px;
+      margin-top:6px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      font-size:14px;
+    }
+
+    select:focus, input:focus{
+      outline:none;
+      border-color:rgba(37,99,235,.55);
+      box-shadow:var(--ring);
+    }
+
+    #msg{
+      margin-top:14px;
+      font-size:14px;
+      color:var(--muted);
+      min-height:18px;
+    }
+
+    #results{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+      gap:16px;
+      margin-top:20px;
+    }
+
+    .resultCard{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      background:#fff;
+    }
+
+    .resultCard h3{
+      margin:0 0 6px;
+    }
+
+    .smallBtn{
+      margin-top:8px;
+      padding:6px 10px;
+      font-size:12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#f8fafc;
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    footer{
+      text-align:center;
+      margin:40px 0;
+      font-size:13px;
+      color:var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">✈</div>
+    Smart Travel
+  </div>
+
+  <div>
+    <button class="btn secondary" onclick="window.location.href='/account.html'">
+      My Account
+    </button>
+    <button class="btn primary" id="logoutBtn">
+      Logout
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>Get Personalised Recommendations</h2>
+
+    <form id="prefsForm">
+
+      <label>Budget</label>
+      <select id="budget">
+        <option value="low">Low</option>
+        <option value="mid" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+
+      <label>Interests (comma separated)</label>
+      <input id="interests" placeholder="culture, food, nature" />
+
+      <label>Climate (optional)</label>
+      <input id="climate" placeholder="sunny, cold, tropical..." />
+
+      <label>Vibe</label>
+      <select id="vibe">
+        <option value="">Any</option>
+        <option value="beach">Beach</option>
+        <option value="city">City</option>
+        <option value="cultural">Cultural</option>
+        <option value="food">Food</option>
+        <option value="nature">Nature</option>
+        <option value="adventure">Adventure</option>
+        <option value="relaxation">Relaxation</option>
+      </select>
+
+      <label>Trip Type</label>
+      <select id="tripType">
+        <option value="">Any</option>
+        <option value="solo">Solo</option>
+        <option value="couple">Couple</option>
+        <option value="family">Family</option>
+        <option value="friends">Friends</option>
+      </select>
+
+      <label>Region</label>
+      <select id="region">
+        <option value="">Any</option>
+        <option value="africa">Africa</option>
+        <option value="americas">Americas</option>
+        <option value="asia">Asia</option>
+        <option value="europe">Europe</option>
+        <option value="oceania">Oceania</option>
+      </select>
+
+      <button type="submit" class="btn primary" style="margin-top:18px;">
+        Find Places
+      </button>
+
+    </form>
+
+    <p id="msg"></p>
+  </div>
+
+  <div id="results"></div>
+
+</main>
+
+<footer>
+  © Smart Travel • Personalised Travel Recommendation System
+</footer>
+
+<script src="api.js"></script>
+<script src="explore.js"></script>
+
+</body>
+</html>

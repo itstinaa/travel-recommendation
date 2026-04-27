@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Register • Smart Travel</title>
+
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:rgba(15,23,42,.12);
+      --primary:#2563eb;
+      --primary2:#1d4ed8;
+      --ring:0 0 0 4px rgba(37,99,235,.18);
+      --shadow:0 18px 40px rgba(15,23,42,.10);
+      --r:22px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+
+    a{color:var(--primary); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .wrap{
+      width:min(440px, 92vw);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:950;
+      margin-bottom:14px;
+      user-select:none;
+    }
+
+    .logo{
+      width:38px;
+      height:38px;
+      border-radius:14px;
+      background: linear-gradient(135deg, var(--primary), #60a5fa);
+      display:grid;
+      place-items:center;
+      box-shadow: 0 14px 26px rgba(37,99,235,.18);
+      color:#fff;
+      font-weight:900;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    h1{
+      margin:0 0 6px;
+      font-size:22px;
+      letter-spacing:-.3px;
+    }
+
+    .sub{
+      margin:0 0 16px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:rgba(15,23,42,.75);
+      font-weight:900;
+      margin:10px 0 6px;
+    }
+
+    input{
+      width:100%;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      outline:none;
+      font-size:14px;
+      background:#fff;
+    }
+
+    input:focus{
+      border-color: rgba(37,99,235,.55);
+      box-shadow: var(--ring);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .toggleBtn{
+      flex:0 0 auto;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(15,23,42,.03);
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .btn{
+      width:100%;
+      margin-top:14px;
+      padding:12px 14px;
+      border:none;
+      border-radius:999px;
+      color:#fff;
+      font-weight:950;
+      cursor:pointer;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      box-shadow: 0 18px 35px rgba(37,99,235,.22);
+      transition: transform .12s ease;
+    }
+
+    .btn:hover{transform: translateY(-1px)}
+
+    .btn:disabled{
+      opacity:.7;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .msg{
+      margin:12px 0 0;
+      font-size:13px;
+      color:var(--muted);
+      min-height:18px;
+    }
+
+    .msg.ok{color:#16a34a}
+    .msg.err{color:#dc2626}
+
+    .footerRow{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:14px;
+      font-size:13px;
+      color:var(--muted);
+      flex-wrap:wrap;
+    }
+
+    .pillLink{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.8);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="wrap">
+
+    <div class="brand">
+      <div class="logo">✈</div>
+      <div>Smart Travel</div>
+    </div>
+
+    <div class="card">
+
+      <h1>Create account</h1>
+      <p class="sub">Register to save favourites and personalise recommendations.</p>
+
+      <form id="registerForm" novalidate>
+
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          placeholder="you@example.com"
+          required
+          autocomplete="email"
+        />
+
+        <label for="password">Password</label>
+
+        <div class="row">
+          <input
+            id="password"
+            type="password"
+            placeholder="Minimum 6 characters"
+            required
+            minlength="6"
+            autocomplete="new-password"
+          />
+
+          <button type="button" class="toggleBtn" id="togglePw">
+            Show
+          </button>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">
+          Register
+        </button>
+
+        <p class="msg" id="msg"></p>
+
+      </form>
+
+      <div class="footerRow">
+        <a class="pillLink" href="/login.html">Already have an account?</a>
+        <a class="pillLink" href="/">← Back to home</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="register.js"></script>
+
+  <script>
+    // Show / hide password
+    const pw = document.getElementById("password");
+    const toggle = document.getElementById("togglePw");
+
+    toggle.addEventListener("click", () => {
+      const hidden = pw.type === "password";
+      pw.type = hidden ? "text" : "password";
+      toggle.textContent = hidden ? "Hide" : "Show";
+    });
+  </script>
+
+</body>
+</html>

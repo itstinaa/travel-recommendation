@@ -1,0 +1,1582 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Travel Recommendation</title>
+
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --border:rgba(15,23,42,.10);
+
+      --primary:#2563eb;
+      --primary2:#1d4ed8;
+      --good:#16a34a;
+      --warn:#f59e0b;
+      --danger:#dc2626;
+
+      --shadow: 0 18px 40px rgba(15,23,42,.10);
+      --shadow2: 0 12px 26px rgba(15,23,42,.08);
+
+      --r: 20px;
+      --r2: 26px;
+      --ring: 0 0 0 4px rgba(37,99,235,.18);
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      color:var(--text);
+      background: var(--bg);
+      min-height:100vh;
+    }
+
+    .container{width:min(1120px,92vw); margin:0 auto}
+
+    header{
+      position:sticky; top:0; z-index:50;
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(14px);
+      border-bottom:1px solid var(--border);
+    }
+    nav{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 0; gap:12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:950; letter-spacing:.2px;
+      cursor:default; user-select:none;
+    }
+    .logo{
+      width:36px;height:36px;border-radius:14px;
+      background: linear-gradient(135deg, var(--primary), #60a5fa);
+      box-shadow: 0 14px 26px rgba(37,99,235,.18);
+      display:grid; place-items:center;
+    }
+    .logo:before{
+      content:"✈";
+      font-size:16px;
+      color:#fff;
+      font-weight:900;
+    }
+
+    .links{
+      display:flex; gap:8px;
+      color: rgba(15,23,42,.80);
+      font-weight:900;
+    }
+    .links a{
+      padding:9px 12px; border-radius:999px;
+      border:1px solid transparent;
+      color: inherit;
+      text-decoration: none;
+    }
+    .links a:hover{
+      background: rgba(15,23,42,.04);
+      border-color: rgba(15,23,42,.08);
+    }
+
+    .btn{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.92);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:950;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+      box-shadow: 0 10px 18px rgba(15,23,42,.06);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .btn:hover{transform: translateY(-1px); border-color: rgba(15,23,42,.14)}
+    .btn:active{transform: translateY(0px)}
+    .btn:focus-visible{outline:none; box-shadow: var(--ring), 0 10px 18px rgba(15,23,42,.08)}
+
+    .btn.primary{
+      border:none;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color:#fff;
+      box-shadow: 0 18px 35px rgba(37,99,235,.22);
+      position:relative;
+      overflow:hidden;
+    }
+    .btn.primary.glow::after{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(260px 120px at 20% 50%, rgba(255,255,255,.60), transparent 60%);
+      opacity:.0;
+      transform: translateX(-30%);
+      animation: glowSweep 2.6s ease-in-out infinite;
+      mix-blend-mode: overlay;
+    }
+    @keyframes glowSweep{
+      0%{opacity:0; transform: translateX(-45%)}
+      35%{opacity:.35}
+      65%{opacity:.25}
+      100%{opacity:0; transform: translateX(45%)}
+    }
+
+    .btn.secondary{
+      background: rgba(15,23,42,.03);
+      border-color: rgba(15,23,42,.10);
+      color: rgba(15,23,42,.90);
+    }
+    .btn.secondary:hover{background: rgba(15,23,42,.05)}
+
+    .btn.danger{
+      background: var(--danger);
+      color:#fff;
+      border:none;
+    }
+
+    .heroWrap{
+      position:relative;
+      isolation:isolate;
+      overflow:hidden;
+    }
+    .heroWrap::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:18px;
+      width:min(1180px, 94vw);
+      height: 500px;
+      border-radius: 28px;
+      background:
+        radial-gradient(900px 280px at 20% 20%, rgba(96,165,250,.55), transparent 60%),
+        radial-gradient(900px 280px at 80% 10%, rgba(59,130,246,.45), transparent 60%),
+        linear-gradient(180deg, #1d4ed8, #2563eb);
+      box-shadow: 0 30px 80px rgba(37,99,235,.25);
+      z-index:-2;
+    }
+    .heroWrap::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      top:18px;
+      width:min(1180px, 94vw);
+      height: 500px;
+      border-radius: 28px;
+      background:
+        radial-gradient(600px 160px at 25% 82%, rgba(255,255,255,.22), transparent 65%),
+        radial-gradient(600px 160px at 75% 90%, rgba(255,255,255,.16), transparent 65%);
+      z-index:-1;
+      pointer-events:none;
+    }
+
+    .hero{padding:54px 0 22px}
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap:18px;
+      align-items:stretch;
+    }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--r2);
+      padding:22px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero .heroGrid > .card:first-child{
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 10px 4px 0;
+    }
+
+    h1{
+      margin:0 0 10px;
+      font-size: clamp(34px, 4.6vw, 54px);
+      line-height:1.02;
+      letter-spacing:-.8px;
+      color:#fff;
+      text-shadow: 0 14px 40px rgba(0,0,0,.18);
+    }
+    .sub{
+      margin:0 0 16px;
+      color: rgba(255,255,255,.88);
+      line-height:1.6;
+      font-size: 15px;
+      max-width: 56ch;
+    }
+
+    .heroCtas{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      margin-top:10px;
+    }
+
+    .statsRow{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:12px;
+      margin-top:18px;
+    }
+    .stat{
+      padding:14px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.12);
+      backdrop-filter: blur(10px);
+    }
+    .statNum{font-size:20px; font-weight:950; color:#fff}
+    .statLabel{margin-top:6px; color:rgba(255,255,255,.82); font-size:13px}
+
+    .search{
+      margin-top:16px;
+      border:1px solid rgba(255,255,255,.30);
+      border-radius: 22px;
+      padding: 14px;
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 22px 60px rgba(15,23,42,.14);
+      display:grid;
+      gap:14px;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap:10px;
+      align-items:end;
+    }
+
+    label{
+      font-size:12px;
+      color: rgba(15,23,42,.70);
+      font-weight:950;
+      letter-spacing:.2px;
+    }
+
+    input, select{
+      width:100%;
+      border:1px solid rgba(15,23,42,.12);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--text);
+      padding: 13px 12px;
+      outline:none;
+      box-shadow: 0 10px 18px rgba(15,23,42,.06);
+    }
+    input::placeholder{color: rgba(15,23,42,.45)}
+    input:focus, select:focus{
+      border-color: rgba(37,99,235,.55);
+      box-shadow: var(--ring), 0 10px 18px rgba(15,23,42,.08);
+    }
+
+    .budgetWrap{
+      display:grid; gap:8px;
+      padding:12px;
+      border:1px solid rgba(15,23,42,.12);
+      border-radius: 16px;
+      background: rgba(15,23,42,.02);
+    }
+    .budgetTop{
+      display:flex; justify-content:space-between; gap:10px; align-items:center;
+    }
+    .budgetLabel{
+      display:flex; gap:10px; align-items:center;
+      color: rgba(15,23,42,.86);
+      font-weight:950;
+      font-size:12px;
+    }
+    .budgetPills{
+      display:flex; gap:8px; align-items:center;
+      font-weight:950;
+      color: rgba(15,23,42,.90);
+      font-size:12px;
+    }
+    .pill{
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.80);
+      padding:6px 10px;
+      border-radius: 999px;
+    }
+    .budgetHint{
+      font-size:12px;
+      color: rgba(15,23,42,.62);
+      font-weight:900;
+      margin-top:2px;
+    }
+    input[type="range"]{width:100%; accent-color: var(--primary);}
+
+    .vibes{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-top:4px;
+    }
+    .vibeTag{
+      border:1px solid rgba(15,23,42,.12);
+      background: #fff;
+      color: rgba(15,23,42,.92);
+      padding:9px 11px;
+      border-radius:999px;
+      font-weight:950;
+      cursor:pointer;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      user-select:none;
+      font-size:12px;
+      box-shadow: 0 10px 18px rgba(15,23,42,.06);
+    }
+    .vibeTag:hover{transform: translateY(-1px); background: rgba(15,23,42,.02)}
+    .vibeTag[aria-pressed="true"]{
+      border-color: rgba(37,99,235,.40);
+      box-shadow: var(--ring), 0 10px 18px rgba(15,23,42,.08);
+      background: rgba(37,99,235,.08);
+    }
+
+    .results{
+      margin-top:6px;
+      display:none;
+      border:1px solid rgba(15,23,42,.12);
+      border-radius:16px;
+      padding:10px;
+      background: #fff;
+    }
+    .results.active{display:block}
+    .resHead{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:6px 6px 10px;
+    }
+
+    .section{padding:34px 0}
+    .secHead{
+      display:flex; justify-content:space-between; align-items:flex-end;
+      gap:12px; margin-bottom:14px;
+    }
+    .secHead h2{margin:0; font-size:22px; letter-spacing:-.3px}
+    .secHead p{margin:0; color:rgba(15,23,42,.62); font-size:13px}
+
+    .grid{display:grid; grid-template-columns:repeat(12,1fr); gap:14px}
+
+    .dest{
+      grid-column: span 4;
+      border:1px solid rgba(15,23,42,.10);
+      border-radius: 18px;
+      background: #fff;
+      overflow:hidden;
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+      box-shadow: var(--shadow2);
+      color: inherit;
+      text-decoration: none;
+      display:flex;
+      flex-direction:column;
+    }
+    .dest:hover{
+      transform: translateY(-3px);
+      border-color: rgba(15,23,42,.16);
+      box-shadow: var(--shadow);
+    }
+    .thumb{
+      height:170px;
+      border-bottom:1px solid rgba(15,23,42,.10);
+      background-size: cover;
+      background-position: center;
+      position:relative;
+    }
+    .thumb::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,.02), rgba(0,0,0,.20));
+      pointer-events:none;
+    }
+    .body{padding:14px; display:flex; flex-direction:column; gap:8px; height:100%}
+    .top{display:flex; justify-content:space-between; gap:10px}
+    .title{margin:0; font-weight:950; letter-spacing:-.2px}
+    .meta{
+      margin:0;
+      color: rgba(15,23,42,.62);
+      font-size:13px; line-height:1.45;
+    }
+    .tagRow{display:flex; gap:8px; flex-wrap:wrap; margin-top:4px}
+    .tag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(15,23,42,.03);
+      color: rgba(15,23,42,.74);
+      font-weight:950;
+    }
+    .score{
+      font-size:12px;
+      font-weight:950;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(245,158,11,.30);
+      background: rgba(245,158,11,.12);
+      color: rgba(156,95,0,.95);
+      white-space:nowrap;
+      height: fit-content;
+    }
+    .cardActions{
+      margin-top:auto;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      padding-top:8px;
+    }
+    .smallBtn{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#fff;
+      color:var(--text);
+      cursor:pointer;
+      font-weight:900;
+      font-size:12px;
+    }
+    .smallBtn.primary{
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      color:#fff;
+      border:none;
+    }
+    .smallBtn.saved{
+      background: rgba(22,163,74,.12);
+      color: var(--good);
+      border:1px solid rgba(22,163,74,.28);
+    }
+    .statusText{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:4px;
+      min-height:16px;
+    }
+
+    .catCard{
+      grid-column: span 3;
+      border:1px solid rgba(15,23,42,.10);
+      border-radius: 18px;
+      background: #fff;
+      padding:16px;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      box-shadow: var(--shadow2);
+      display:flex; gap:12px; align-items:center;
+    }
+    .catCard:hover{
+      transform: translateY(-2px);
+      border-color: rgba(15,23,42,.16);
+      box-shadow: var(--shadow);
+    }
+    .catIcon{
+      width:44px;height:44px;border-radius:16px;
+      display:grid;place-items:center;
+      background: linear-gradient(135deg, rgba(37,99,235,.14), rgba(96,165,250,.12));
+      border:1px solid rgba(15,23,42,.10);
+      font-size:18px;
+    }
+    .catText b{display:block; font-size:14px}
+    .catText span{display:block; margin-top:4px; color:rgba(15,23,42,.58); font-size:12px}
+
+    .howIcon{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-size:24px;
+      margin-bottom:12px;
+      background: linear-gradient(135deg, rgba(37,99,235,.14), rgba(96,165,250,.12));
+      border:1px solid rgba(15,23,42,.10);
+      box-shadow: 0 10px 18px rgba(15,23,42,.06);
+    }
+
+    aside.card{
+      border-radius: var(--r2);
+      background: #fff;
+    }
+
+    .trendMini{display:grid; gap:10px; margin-top:12px;}
+    .miniCard{
+      display:flex; gap:12px; align-items:center;
+      padding:12px;
+      border-radius: 18px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(15,23,42,.02);
+    }
+    .miniImg{
+      width:62px;height:62px;border-radius:16px;
+      border:1px solid rgba(15,23,42,.10);
+      background-size:cover; background-position:center;
+      flex:0 0 auto;
+    }
+    .miniMain{flex:1}
+    .miniTitle{font-weight:950; margin:0}
+    .miniSub{margin:4px 0 0; color:rgba(15,23,42,.60); font-size:12px; line-height:1.4}
+    .miniBadge{
+      font-weight:950;
+      font-size:12px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(37,99,235,.24);
+      background: rgba(37,99,235,.10);
+      color: rgba(37,99,235,.95);
+      white-space:nowrap;
+    }
+
+    #how .card{
+      border-radius: 18px;
+      box-shadow: var(--shadow2);
+    }
+
+    .reviewsGrid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+    }
+    .reviewCard{
+      grid-column: span 6;
+      border:1px solid rgba(15,23,42,.10);
+      background: #fff;
+      border-radius: 18px;
+      padding:16px;
+      box-shadow: var(--shadow2);
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .reviewCard:hover{
+      transform: translateY(-2px);
+      border-color: rgba(15,23,42,.16);
+      box-shadow: var(--shadow);
+    }
+    .reviewTop{display:flex; gap:12px; align-items:center;}
+    .avatar{
+      width:44px; height:44px;
+      border-radius:16px;
+      display:grid; place-items:center;
+      font-weight:950;
+      color:#fff;
+      background: linear-gradient(135deg, var(--primary), #60a5fa);
+      border:1px solid rgba(15,23,42,.10);
+      flex:0 0 auto;
+      user-select:none;
+    }
+    .reviewMeta{flex:1}
+    .nameRow{display:flex; justify-content:space-between; gap:10px; align-items:center;}
+    .verified{
+      font-size:12px;
+      font-weight:950;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(22,163,74,.26);
+      background: rgba(22,163,74,.10);
+      color: rgba(15,23,42,.86);
+      white-space:nowrap;
+    }
+    .smallRow{
+      margin-top:6px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      color: rgba(15,23,42,.60);
+      font-size:12px;
+      font-weight:900;
+    }
+    .stars{display:inline-flex; gap:4px;}
+    .star{opacity:.25; color: rgba(245,158,11,.85)}
+    .star.filled{opacity:1; color: rgba(245,158,11,.95)}
+    .reviewText{margin:12px 0 0; color: rgba(15,23,42,.78); line-height:1.6;}
+    .reviewTags{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+
+    .empty{
+      grid-column:1/-1;
+      color: rgba(15,23,42,.70);
+      font-size: 13px;
+      padding: 12px;
+      border: 1px dashed rgba(15,23,42,.18);
+      border-radius: 14px;
+      background: rgba(255,255,255,.85);
+    }
+
+    .itinerary{
+      grid-column: span 4;
+      border:1px solid rgba(15,23,42,.10);
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow: var(--shadow2);
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+    }
+    .itinerary:hover{
+      transform: translateY(-2px);
+      border-color: rgba(15,23,42,.16);
+      box-shadow: var(--shadow);
+    }
+    .itTop{
+      height:160px;
+      background-size:cover;
+      background-position:center;
+      border-bottom:1px solid rgba(15,23,42,.10);
+      position:relative;
+    }
+    .itTop::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.28));
+      pointer-events:none;
+    }
+    .itBody{padding:14px}
+    .itTitle{
+      margin:0;
+      font-weight:950;
+      letter-spacing:-.2px;
+      font-size:15px;
+    }
+    .itSub{
+      margin:6px 0 0;
+      color: rgba(15,23,42,.62);
+      font-size:13px;
+      line-height:1.45;
+    }
+    .itinerary ul{
+      margin:10px 0 0;
+      padding-left:18px;
+      color: rgba(15,23,42,.72);
+      line-height:1.6;
+      font-size:13px;
+    }
+
+    .topRow{
+      display:grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap:16px;
+      align-items:end;
+    }
+
+    .budgetRow{
+      display:flex;
+      justify-content:center;
+      margin-top:6px;
+    }
+
+    .budgetRow .budgetWrap{
+      width:min(420px, 100%);
+    }
+
+    footer{
+      padding:30px 0 40px;
+      border-top:1px solid rgba(15,23,42,.10);
+      color: rgba(15,23,42,.62);
+      margin-top:20px;
+      background: rgba(255,255,255,.60);
+    }
+    footer a{color: rgba(15,23,42,.62); text-decoration:none}
+    footer a:hover{color: var(--text)}
+
+    @media (max-width:980px){
+      .heroWrap::before, .heroWrap::after{height: 620px;}
+      .heroGrid{grid-template-columns:1fr}
+      .row{grid-template-columns: 1fr}
+      .statsRow{grid-template-columns:1fr}
+      .dest{grid-column:span 6}
+      .catCard{grid-column:span 6}
+      .itinerary{grid-column:span 6}
+      .reviewCard{grid-column: span 12;}
+    }
+    @media (max-width:620px){
+      .links{display:none}
+      .dest{grid-column:span 12}
+      .catCard{grid-column:span 12}
+      .itinerary{grid-column:span 12}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none !important; transition:none !important}
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <span class="logo" aria-hidden="true"></span>
+          <span>Smart Travel</span>
+        </div>
+
+        <div class="links">
+          <a href="#featured">Featured</a>
+          <a href="#categories">Categories</a>
+          <a href="#how">How it works</a>
+          <a href="#testimonials">Reviews</a>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:center" id="navActions">
+          <button class="btn" id="btnLogin">Log in</button>
+          <button class="btn primary glow" id="btnGetRecommendations">Get recommendations</button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="heroWrap">
+    <section class="hero">
+      <div class="container heroGrid">
+        <div class="card">
+          <h1>Plan your next trip with smarter recommendations.</h1>
+          <p class="sub">
+            Search destinations, choose your vibe, climate, and budget, then explore personalised travel ideas powered by your travel data.
+          </p>
+
+          <div class="heroCtas">
+            <button class="btn primary glow" id="btnGetStarted">Start searching</button>
+            <button class="btn secondary" id="btnSeeHow">See how it works</button>
+          </div>
+
+          <div class="statsRow" aria-label="Quick stats">
+            <div class="stat">
+              <div class="statNum" id="statDestinations">15+</div>
+              <div class="statLabel">destinations available</div>
+            </div>
+            <div class="stat">
+              <div class="statNum" id="statTravelers">500+</div>
+              <div class="statLabel">travelers helped</div>
+            </div>
+            <div class="stat">
+              <div class="statNum" id="statMatches">Instant</div>
+              <div class="statLabel">matches from your filters</div>
+            </div>
+          </div>
+
+          <div class="search" aria-label="Search recommendations" style="margin-top:16px">
+
+            <div class="row topRow">
+              <div>
+                <label for="q">What type of place do you want to search for?</label>
+                <input id="q" placeholder="Try: beach getaway, Tokyo, food trip, romantic island..." />
+              </div>
+
+              <div>
+                <label for="climateHome">Preferred climate</label>
+                <select id="climateHome">
+                  <option value="">Any climate</option>
+                  <option value="tropical">Tropical</option>
+                  <option value="sunny">Sunny</option>
+                  <option value="mild">Mild</option>
+                  <option value="cold">Cold</option>
+                  <option value="hot">Hot</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="budgetRow">
+              <div class="budgetWrap">
+                <div class="budgetTop">
+                  <div class="budgetLabel">Budget</div>
+                  <div class="budgetPills">
+                    <span class="pill" id="budgetText">££</span>
+                  </div>
+                </div>
+                <div class="budgetHint" id="budgetHint">Mid-range — £80–£160/day</div>
+                <input id="budgetRange" type="range" min="1" max="3" step="1" value="2" />
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:rgba(15,23,42,.55); font-weight:900">
+                  <span>£</span><span>££</span><span>£££</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label style="display:block; margin-bottom:8px">Pick a vibe</label>
+              <div class="vibes" id="vibeTags">
+                <button type="button" class="vibeTag" data-vibe="beach" aria-pressed="false">🏖 Beach</button>
+                <button type="button" class="vibeTag" data-vibe="adventure" aria-pressed="false">🧗 Adventure</button>
+                <button type="button" class="vibeTag" data-vibe="culture" aria-pressed="false">🏛 Culture</button>
+                <button type="button" class="vibeTag" data-vibe="food" aria-pressed="false">🍜 Food</button>
+                <button type="button" class="vibeTag" data-vibe="city" aria-pressed="false">🏙 City</button>
+                <button type="button" class="vibeTag" data-vibe="nature" aria-pressed="false">🌿 Nature</button>
+                <button type="button" class="vibeTag" data-vibe="luxury" aria-pressed="false">💎 Luxury</button>
+                <button type="button" class="vibeTag" data-vibe="romance" aria-pressed="false">💕 Romance</button>
+                <button type="button" class="vibeTag" data-vibe="wellness" aria-pressed="false">🧘 Wellness</button>
+              </div>
+
+              <div style="margin-top:16px; display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
+                <button class="btn secondary" id="btnClearFilters">Clear filters</button>
+                <button class="btn primary glow" id="btnSearch">Search</button>
+              </div>
+            </div>
+
+            <div class="results" id="results">
+              <div class="resHead">
+                <strong id="resTitle">Results</strong>
+                <button class="btn" id="btnClear" style="padding:7px 10px">Clear results</button>
+              </div>
+              <div class="grid" id="resultsGrid"></div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="card">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+            <span class="tag">Today’s trend</span>
+            <span class="tag" id="trendBadge">Loading…</span>
+          </div>
+
+          <div style="font-size:28px;font-weight:950;margin:12px 0 0" id="trendTitle">—</div>
+          <p class="meta" id="trendDesc">Fetching trending destination…</p>
+
+          <div class="trendMini" id="trendMiniWrap"></div>
+
+          <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
+            <button class="btn" id="btnSeedHint">Seed demo data</button>
+            <button class="btn secondary" id="btnRefreshAll">Refresh</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="featured">
+      <div class="container">
+        <div class="secHead">
+          <div>
+            <h2>Featured destinations</h2>
+            <p>Explore real destinations from your API, with placeholders shown if no data is available.</p>
+          </div>
+          <button class="btn" id="btnRefreshFeatured">Refresh</button>
+        </div>
+        <div class="grid" id="featuredGrid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="categories">
+      <div class="container">
+        <div class="secHead">
+          <div>
+            <h2>Explore by category</h2>
+            <p>Click a category to filter featured destinations.</p>
+          </div>
+        </div>
+        <div class="grid" id="categoriesGrid"></div>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <div class="container">
+        <div class="secHead">
+          <div>
+            <h2>How it works</h2>
+            <p>Search + filter → API → MongoDB recommendations.</p>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card" style="grid-column:span 4">
+            <div class="howIcon">🔎</div>
+            <b>1) Enter your trip idea</b>
+            <p class="meta">Search for a destination or type of trip, then choose a vibe, climate, and budget.</p>
+          </div>
+
+          <div class="card" style="grid-column:span 4">
+            <div class="howIcon">⚙️</div>
+            <b>2) We match fast</b>
+            <p class="meta">Your Express API queries MongoDB and ranks destinations using your filters.</p>
+          </div>
+
+          <div class="card" style="grid-column:span 4">
+            <div class="howIcon">⭐</div>
+            <b>3) Save + personalize</b>
+            <p class="meta">Create an account to save favourites and get more personalised results.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="testimonials">
+      <div class="container">
+        <div class="secHead">
+          <div>
+            <h2>Loved by travelers</h2>
+            <p>Static reviews to showcase the style of user feedback.</p>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+            <span class="tag" style="border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12);">
+              ★ 4.8 average
+            </span>
+            <span class="tag">2,100+ reviews</span>
+          </div>
+        </div>
+
+        <div class="reviewsGrid">
+          <article class="reviewCard">
+            <header class="reviewTop">
+              <div class="avatar" aria-hidden="true">M</div>
+              <div class="reviewMeta">
+                <div class="nameRow">
+                  <strong class="reviewName">Maya</strong>
+                  <span class="verified">Verified trip</span>
+                </div>
+                <div class="smallRow">
+                  <span class="stars" aria-label="5 stars">
+                    <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span>
+                  </span>
+                  <span class="reviewDate">2 days ago</span>
+                </div>
+              </div>
+            </header>
+            <p class="reviewText">“Found a perfect 5-day itinerary in minutes. The vibe filters are genuinely useful.”</p>
+            <div class="reviewTags">
+              <span class="tag">Tokyo</span>
+              <span class="tag">Food</span>
+              <span class="tag">££</span>
+            </div>
+          </article>
+
+          <article class="reviewCard">
+            <header class="reviewTop">
+              <div class="avatar" aria-hidden="true">S</div>
+              <div class="reviewMeta">
+                <div class="nameRow">
+                  <strong class="reviewName">Sam</strong>
+                  <span class="verified">Verified trip</span>
+                </div>
+                <div class="smallRow">
+                  <span class="stars" aria-label="4 stars">
+                    <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star">★</span>
+                  </span>
+                  <span class="reviewDate">1 week ago</span>
+                </div>
+              </div>
+            </header>
+            <p class="reviewText">“Budget slider made it easy. Recommendations matched what I could actually afford.”</p>
+            <div class="reviewTags">
+              <span class="tag">Lisbon</span>
+              <span class="tag">City break</span>
+              <span class="tag">£</span>
+            </div>
+          </article>
+
+          <article class="reviewCard">
+            <header class="reviewTop">
+              <div class="avatar" aria-hidden="true">A</div>
+              <div class="reviewMeta">
+                <div class="nameRow">
+                  <strong class="reviewName">Aisha</strong>
+                  <span class="verified">Verified trip</span>
+                </div>
+                <div class="smallRow">
+                  <span class="stars" aria-label="5 stars">
+                    <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span>
+                  </span>
+                  <span class="reviewDate">3 weeks ago</span>
+                </div>
+              </div>
+            </header>
+            <p class="reviewText">“Trending section helped me pick quickly. Ended up booking a place I loved.”</p>
+            <div class="reviewTags">
+              <span class="tag">Bali</span>
+              <span class="tag">Beach</span>
+              <span class="tag">££</span>
+            </div>
+          </article>
+
+          <article class="reviewCard">
+            <header class="reviewTop">
+              <div class="avatar" aria-hidden="true">J</div>
+              <div class="reviewMeta">
+                <div class="nameRow">
+                  <strong class="reviewName">Jordan</strong>
+                  <span class="verified">Verified trip</span>
+                </div>
+                <div class="smallRow">
+                  <span class="stars" aria-label="5 stars">
+                    <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span>
+                  </span>
+                  <span class="reviewDate">1 month ago</span>
+                </div>
+              </div>
+            </header>
+            <p class="reviewText">“The categories are spot on. I found an adventure trip idea instantly.”</p>
+            <div class="reviewTags">
+              <span class="tag">Iceland</span>
+              <span class="tag">Adventure</span>
+              <span class="tag">£££</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="itineraries">
+      <div class="container">
+        <div class="secHead">
+          <div>
+            <h2>Popular itineraries</h2>
+            <p>Sample trip plans to inspire users.</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="itinerary">
+            <div class="itTop" style="background-image:url('https://plus.unsplash.com/premium_photo-1661964177687-57387c2cbd14?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')"></div>
+            <div class="itBody">
+              <h3 class="itTitle">🍜 Tokyo — 3 days (City + Food)</h3>
+              <p class="itSub">Neon streets, temples, and the best street food spots.</p>
+              <ul>
+                <li>Day 1: Shibuya + Harajuku + sunset viewpoint</li>
+                <li>Day 2: Asakusa + museum + night street food</li>
+                <li>Day 3: Day trip (Nikko / Kamakura)</li>
+              </ul>
+              <div class="tagRow">
+                <span class="tag">city</span><span class="tag">food</span><span class="tag">££</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="itinerary">
+            <div class="itTop" style="background-image:url('https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')"></div>
+            <div class="itBody">
+              <h3 class="itTitle">🏖 Bali — 5 days (Relaxing)</h3>
+              <p class="itSub">Beach mornings, rice terraces, and spa evenings.</p>
+              <ul>
+                <li>Day 1: Beach + café hopping</li>
+                <li>Day 2: Rice terraces + spa</li>
+                <li>Day 3: Waterfalls + local food</li>
+                <li>Day 4: Surf lesson + sunset</li>
+                <li>Day 5: Slow morning + shopping</li>
+              </ul>
+              <div class="tagRow">
+                <span class="tag">beach</span><span class="tag">nature</span><span class="tag">£</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="itinerary">
+            <div class="itTop" style="background-image:url('https://images.unsplash.com/photo-1529154036614-a60975f5c760?auto=format&fit=crop&w=1600&q=80')"></div>
+            <div class="itBody">
+              <h3 class="itTitle">🏛 Rome — 4 days (Culture)</h3>
+              <p class="itSub">Iconic history, museums, and the perfect food tour.</p>
+              <ul>
+                <li>Day 1: Colosseum + Forum</li>
+                <li>Day 2: Vatican Museums + strolls</li>
+                <li>Day 3: Trastevere + food tour</li>
+                <li>Day 4: Day trip (Tivoli / Ostia)</li>
+              </ul>
+              <div class="tagRow">
+                <span class="tag">culture</span><span class="tag">food</span><span class="tag">££</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>© <span id="year"></span> TravelRecommendation</div>
+        <div style="display:flex;gap:14px">
+          <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="api.js"></script>
+  <script>
+    const API = "";
+
+    const $ = (id)=>document.getElementById(id);
+    const esc = (s = "") =>
+      String(s).replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[c]));
+
+    let selectedVibe = "";
+    let selectedBudget = "mid";
+    let favouriteDestinationIds = new Set();
+
+    const fallbackImages = {
+      bali: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1600&q=80",
+      tokyo:"https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      rome: "https://images.unsplash.com/photo-1529154036614-a60975f5c760?auto=format&fit=crop&w=1600&q=80",
+      lisbon:"https://images.unsplash.com/photo-1548707309-dcebeab9ea9b?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      iceland:"https://images.unsplash.com/photo-1504893524553-b855bce32c67?auto=format&fit=crop&w=1600&q=80",
+      paris:"https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=80",
+      dubai:"https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1600&q=80",
+      newyork:"https://images.unsplash.com/photo-1546436836-07a91091f160?auto=format&fit=crop&w=1600&q=80",
+      capetown:"https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1600&q=80",
+      bangkok:"https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=1600&q=80",
+      barcelona:"https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=1600&q=80",
+      santorini:"https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=1600&q=80",
+      sydney:"https://images.unsplash.com/photo-1506973035872-a4f23ef4c5c9?auto=format&fit=crop&w=1600&q=80",
+      default:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80"
+    };
+
+    const placeholderDestinations = [
+      { _id:"p1", name:"Bali", city:"Ubud / Canggu", country:"Indonesia", vibe:"beach", budget:"low", climateType:"tropical", score:4.8, summary:"Beach clubs, hidden waterfalls, and a slow island vibe.", imageUrl:fallbackImages.bali, tags:["surf","spa","sunset"] },
+      { _id:"p2", name:"Tokyo", city:"Tokyo", country:"Japan", vibe:"city", budget:"high", climateType:"mild", score:4.9, summary:"Neon nights, ramen runs, and culture packed into every corner.", imageUrl:fallbackImages.tokyo, tags:["ramen","shopping","nightlife"] },
+      { _id:"p3", name:"Rome", city:"Rome", country:"Italy", vibe:"culture", budget:"mid", climateType:"mild", score:4.7, summary:"Ancient streets, iconic landmarks, and unforgettable food spots.", imageUrl:fallbackImages.rome, tags:["history","museums","pizza"] },
+      { _id:"p4", name:"Lisbon", city:"Lisbon", country:"Portugal", vibe:"city", budget:"mid", climateType:"sunny", score:4.7, summary:"Golden sunsets, tram rides, and coastal day trips nearby.", imageUrl:fallbackImages.lisbon, tags:["views","seafood","walkable"] },
+      { _id:"p5", name:"Iceland", city:"Reykjavík", country:"Iceland", vibe:"nature", budget:"high", climateType:"cold", score:4.6, summary:"Glaciers, hot springs, and the best road trip scenery in Europe.", imageUrl:fallbackImages.iceland, tags:["aurora","waterfalls","geysers"] },
+      { _id:"p6", name:"Paris", city:"Paris", country:"France", vibe:"city", budget:"high", climateType:"mild", score:4.8, summary:"Museums, cafés, and dreamy walks along the Seine.", imageUrl:fallbackImages.paris, tags:["eiffel","cafés","museums"] },
+      { _id:"p7", name:"Dubai", city:"Dubai", country:"UAE", vibe:"luxury", budget:"high", climateType:"hot", score:4.7, summary:"Luxury skyline views, desert safaris, and epic shopping.", imageUrl:fallbackImages.dubai, tags:["desert","luxury","skyline"] },
+      { _id:"p8", name:"New York", city:"New York City", country:"USA", vibe:"city", budget:"high", climateType:"cold", score:4.7, summary:"Broadway nights, iconic landmarks, and neighborhoods full of energy.", imageUrl:fallbackImages.newyork, tags:["broadway","skyline","food"] },
+      { _id:"p9", name:"Cape Town", city:"Cape Town", country:"South Africa", vibe:"nature", budget:"mid", climateType:"sunny", score:4.8, summary:"Mountain hikes, ocean views, and stunning wine region day trips.", imageUrl:fallbackImages.capetown, tags:["hikes","beaches","wine"] },
+      { _id:"p10", name:"Bangkok", city:"Bangkok", country:"Thailand", vibe:"city", budget:"low", climateType:"tropical", score:4.6, summary:"Street food, temples, rooftop views, and nightlife.", imageUrl:fallbackImages.bangkok, tags:["food","temples","nightlife"] },
+      { _id:"p11", name:"Barcelona", city:"Barcelona", country:"Spain", vibe:"beach", budget:"mid", climateType:"sunny", score:4.7, summary:"Beach meets architecture, tapas, and nightlife.", imageUrl:fallbackImages.barcelona, tags:["beach","food","architecture"] },
+      { _id:"p12", name:"Santorini", city:"Santorini", country:"Greece", vibe:"romance", budget:"high", climateType:"sunny", score:4.8, summary:"Whitewashed views, sunsets, and couples’ escapes.", imageUrl:fallbackImages.santorini, tags:["sunset","luxury","romance"] },
+      { _id:"p13", name:"Sydney", city:"Sydney", country:"Australia", vibe:"beach", budget:"high", climateType:"sunny", score:4.7, summary:"Surf, skyline, and laid-back coastal energy.", imageUrl:fallbackImages.sydney, tags:["surf","city","harbour"] }
+    ];
+
+    const defaultCategories = [
+      { key:"Beach", icon:"🏖", desc:"Sun, sand & chill", mapsTo:"beach" },
+      { key:"Adventure", icon:"🧗", desc:"Hikes & thrills", mapsTo:"adventure" },
+      { key:"Culture", icon:"🏛", desc:"Museums & history", mapsTo:"culture" },
+      { key:"Food", icon:"🍜", desc:"Street food & tours", mapsTo:"food" },
+      { key:"Nature", icon:"🌿", desc:"Lakes & forests", mapsTo:"nature" },
+      { key:"City breaks", icon:"🏙", desc:"Fast-paced weekends", mapsTo:"city" },
+      { key:"Luxury", icon:"💎", desc:"Premium experiences", mapsTo:"luxury" },
+      { key:"Romantic", icon:"💕", desc:"Couples getaways", mapsTo:"romance" }
+    ];
+
+    function isLoggedIn() {
+      return !!getToken();
+    }
+
+    function updateNav() {
+      const nav = $("navActions");
+      if (!nav) return;
+
+      if (isLoggedIn()) {
+        nav.innerHTML = `
+          <a class="btn secondary" href="/account.html">My Account</a>
+          <button class="btn danger" id="btnLogout">Logout</button>
+        `;
+        $("btnLogout").addEventListener("click", () => {
+          clearToken();
+          window.location.href = "/login.html";
+        });
+      } else {
+        nav.innerHTML = `
+          <button class="btn" id="btnLogin">Log in</button>
+          <button class="btn primary glow" id="btnGetRecommendations">Get recommendations</button>
+        `;
+        $("btnLogin").addEventListener("click", ()=> { window.location.href = "/login.html"; });
+        $("btnGetRecommendations").addEventListener("click", ()=> $("q").focus());
+      }
+    }
+
+    async function loadFavouriteIds() {
+      if (!isLoggedIn()) {
+        favouriteDestinationIds = new Set();
+        return;
+      }
+
+      try {
+        const favs = await apiFetch("/favourites", { auth: true });
+        favouriteDestinationIds = new Set(
+          favs
+            .map(f => f.destinationId?._id || f.destinationId)
+            .filter(Boolean)
+            .map(String)
+        );
+      } catch (err) {
+        console.error("Could not load favourites:", err.message);
+        favouriteDestinationIds = new Set();
+      }
+    }
+
+    function budgetFromSlider(val){
+      if (val === 1) return "low";
+      if (val === 2) return "mid";
+      return "high";
+    }
+
+    function budgetText(val){
+      if (val === 1) return "£ Budget";
+      if (val === 2) return "££ Mid";
+      return "£££ Luxury";
+    }
+
+    function hintText(v){
+      if (v === 1) return "Budget — £40–£80/day";
+      if (v === 2) return "Mid-range — £80–£160/day";
+      return "Luxury — £160+/day";
+    }
+
+    function pickImage(d){
+      if (d.imageUrl) return d.imageUrl;
+      const k = (d.name || "").toLowerCase();
+
+      if (k.includes("bali")) return fallbackImages.bali;
+      if (k.includes("tokyo")) return fallbackImages.tokyo;
+      if (k.includes("rome")) return fallbackImages.rome;
+      if (k.includes("lisbon")) return fallbackImages.lisbon;
+      if (k.includes("iceland") || k.includes("reyk")) return fallbackImages.iceland;
+      if (k.includes("paris")) return fallbackImages.paris;
+      if (k.includes("dubai")) return fallbackImages.dubai;
+      if (k.includes("new york") || k.includes("nyc")) return fallbackImages.newyork;
+      if (k.includes("cape town")) return fallbackImages.capetown;
+      if (k.includes("bangkok")) return fallbackImages.bangkok;
+      if (k.includes("barcelona")) return fallbackImages.barcelona;
+      if (k.includes("santorini")) return fallbackImages.santorini;
+      if (k.includes("sydney")) return fallbackImages.sydney;
+
+      return fallbackImages.default;
+    }
+
+    function saveButtonMarkup(d) {
+      const saved = favouriteDestinationIds.has(String(d._id));
+      if (saved) {
+        return `<button class="smallBtn saved" disabled>❤️ Saved</button>`;
+      }
+      return `<button class="smallBtn primary" data-save-id="${esc(d._id || "")}">⭐ Save</button>`;
+    }
+
+    function card(d){
+      const tags = (d.tags||[]).slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join("");
+      const score = (typeof d.score==="number") ? d.score.toFixed(1) : "—";
+      const img = pickImage(d);
+
+      return `
+        <div class="dest">
+          <div class="thumb" style="background-image:url('${esc(img)}')"></div>
+          <div class="body">
+            <div class="top">
+              <div>
+                <p class="title">${esc(d.name||"Unknown")}</p>
+                <p class="meta">${esc(d.country||"")} ${d.city ? "• "+esc(d.city) : ""}</p>
+              </div>
+              <span class="score">★ ${score}</span>
+            </div>
+            <p class="meta">${esc(d.summary||"Explore this destination.")}</p>
+            <div class="tagRow">
+              <span class="tag">${esc(d.vibe||"any")}</span>
+              <span class="tag">${esc(d.budget||"any")}</span>
+              ${d.climateType ? `<span class="tag">${esc(d.climateType)}</span>` : ""}
+              ${tags}
+            </div>
+            <div class="cardActions">
+              <a class="smallBtn" href="/explore.html">View more</a>
+              ${saveButtonMarkup(d)}
+            </div>
+            <div class="statusText" id="status-${esc(d._id || "")}"></div>
+          </div>
+        </div>
+      `;
+    }
+
+  function attachSaveEvents() {
+    document.querySelectorAll("[data-save-id]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const destinationId = btn.dataset.saveId;
+        const status = document.getElementById(`status-${destinationId}`);
+
+        if (!isLoggedIn()) {
+          localStorage.setItem("pendingFavouriteId", destinationId);
+          localStorage.setItem("pendingFavouriteSource", "home");
+          localStorage.setItem("pendingFavouriteRedirect", window.location.pathname + window.location.search);
+
+          if (status) status.textContent = "Please log in to save this destination.";
+
+          setTimeout(() => {
+            window.location.href = "/login.html";
+          }, 700);
+
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Saving...";
+        if (status) status.textContent = "";
+
+        try {
+          await apiFetch("/favourites", {
+            method: "POST",
+            auth: true,
+            body: { destinationId }
+          });
+
+          favouriteDestinationIds.add(String(destinationId));
+          btn.classList.remove("primary");
+          btn.classList.add("saved");
+          btn.textContent = "❤️ Saved";
+          if (status) status.textContent = "Saved to favourites.";
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = "⭐ Save";
+          if (status) status.textContent = err.message;
+        }
+      });
+    });
+  }
+
+    async function getJSON(path){
+      const res = await fetch(API + path);
+      if(!res.ok) throw new Error(res.status);
+      return res.json();
+    }
+
+    function renderCategories(){
+      const grid = $("categoriesGrid");
+      grid.innerHTML = defaultCategories.map(c => `
+        <div class="catCard" data-vibe="${esc(c.mapsTo)}" data-key="${esc(c.key)}">
+          <div class="catIcon" aria-hidden="true">${esc(c.icon)}</div>
+          <div class="catText">
+            <b>${esc(c.key)}</b>
+            <span>${esc(c.desc)}</span>
+          </div>
+        </div>
+      `).join("");
+
+      grid.addEventListener("click", (e) => {
+        const cardEl = e.target.closest(".catCard");
+        if (!cardEl) return;
+
+        const vibe = cardEl.dataset.vibe || "";
+        if (vibe) {
+          setVibe(vibe);
+          loadFeatured("");
+          document.querySelector("#featured").scrollIntoView({ behavior:"smooth" });
+        }
+      });
+    }
+
+    function setVibe(vibe){
+      selectedVibe = (selectedVibe === vibe) ? "" : vibe;
+      const tags = document.querySelectorAll("#vibeTags .vibeTag");
+      tags.forEach(t => {
+        const isOn = (selectedVibe && t.dataset.vibe === selectedVibe);
+        t.setAttribute("aria-pressed", isOn ? "true" : "false");
+      });
+    }
+
+    function initVibeTags(){
+      $("vibeTags").addEventListener("click", (e) => {
+        const btn = e.target.closest(".vibeTag");
+        if (!btn) return;
+        setVibe(btn.dataset.vibe);
+      });
+    }
+
+    function initBudget(){
+      const slider = $("budgetRange");
+      const label = $("budgetText");
+      const hint  = $("budgetHint");
+
+      selectedBudget = budgetFromSlider(Number(slider.value));
+      label.textContent = budgetText(Number(slider.value));
+      hint.textContent = hintText(Number(slider.value));
+
+      slider.addEventListener("input", () => {
+        const v = Number(slider.value);
+        selectedBudget = budgetFromSlider(v);
+        label.textContent = budgetText(v);
+        hint.textContent = hintText(v);
+      });
+    }
+
+    function applyClientFilters(list){
+      let out = Array.isArray(list) ? list.slice() : [];
+      const climate = $("climateHome")?.value?.trim().toLowerCase() || "";
+
+      if (selectedVibe) out = out.filter(d => (d.vibe || "").toLowerCase() === selectedVibe);
+      if (selectedBudget) out = out.filter(d => (d.budget || "").toLowerCase() === selectedBudget);
+      if (climate) out = out.filter(d => (d.climateType || "").toLowerCase() === climate);
+
+      return out.slice(0, 9);
+    }
+
+    async function loadFeatured(category=""){
+      const grid = $("featuredGrid");
+      grid.innerHTML = "";
+
+      try{
+        const qs = category ? `?category=${encodeURIComponent(category)}` : "";
+        const list = await getJSON("/api/destinations/featured"+qs);
+
+        const merged = Array.isArray(list) ? list.slice() : [];
+        const need = Math.max(0, 6 - merged.length);
+        if (need > 0) merged.push(...placeholderDestinations.slice(0, need));
+
+        const finalList = applyClientFilters(merged);
+        grid.innerHTML = finalList.length ? finalList.map(card).join("") : `<div class="empty">No featured destinations matched your filters.</div>`;
+      }catch{
+        const finalList = applyClientFilters(placeholderDestinations).slice(0,6);
+        grid.innerHTML = finalList.length ? finalList.map(card).join("") : `<div class="empty">No featured destinations matched your filters.</div>`;
+      }
+
+      attachSaveEvents();
+    }
+
+    async function loadTrending(){
+      const mini = $("trendMiniWrap");
+      try{
+        const t = await getJSON("/api/destinations/trending");
+        $("trendBadge").textContent = t.badge || "Trending";
+        $("trendTitle").textContent = t.name || "—";
+        $("trendDesc").textContent = t.summary || "—";
+
+        let list = [];
+        try { list = await getJSON("/api/destinations/featured"); }
+        catch { list = placeholderDestinations; }
+        list = (Array.isArray(list) ? list : placeholderDestinations).slice(0, 3);
+
+        mini.innerHTML = list.map((d, i) => {
+          const img = pickImage(d);
+          const n = (i === 0) ? 180 + Math.floor(Math.random() * 220) : (60 + Math.floor(Math.random()*120));
+          return `
+            <div class="miniCard">
+              <div class="miniImg" style="background-image:url('${esc(img)}')"></div>
+              <div class="miniMain">
+                <p class="miniTitle">🔥 ${esc(d.name || "Trending")}</p>
+                <p class="miniSub">${esc(d.country || "")}${d.city ? " • " + esc(d.city) : ""} — ${n} searches today</p>
+              </div>
+              <span class="miniBadge">Trending</span>
+            </div>
+          `;
+        }).join("");
+      }catch{
+        $("trendBadge").textContent = "Offline";
+        $("trendTitle").textContent = "Bali";
+        $("trendDesc").textContent = "Beach clubs, hidden waterfalls, and a slow island vibe.";
+
+        const list = placeholderDestinations.slice(0, 3);
+        mini.innerHTML = list.map((d, i) => `
+          <div class="miniCard">
+            <div class="miniImg" style="background-image:url('${esc(pickImage(d))}')"></div>
+            <div class="miniMain">
+              <p class="miniTitle">🔥 ${esc(d.name)}</p>
+              <p class="miniSub">${esc(d.country)}${d.city ? " • " + esc(d.city) : ""} — ${i===0 ? 245 + Math.floor(Math.random() * 120) : (70 + Math.floor(Math.random()*120))} searches today</p>
+            </div>
+            <span class="miniBadge">Trending</span>
+          </div>
+        `).join("");
+      }
+    }
+
+    async function search(){
+      const q = $("q").value.trim();
+      const budget = selectedBudget;
+      const vibe = selectedVibe;
+      const climate = $("climateHome").value.trim();
+
+      const params = new URLSearchParams();
+      if(q) params.set("q", q);
+      if(budget) params.set("budget", budget);
+      if(vibe) params.set("vibe", vibe);
+      if(climate) params.set("climate", climate);
+
+      $("results").classList.add("active");
+      $("resTitle").textContent = "Searching…";
+      $("resultsGrid").innerHTML = "";
+
+      try{
+        const list = await getJSON("/api/destinations/search?"+params.toString());
+        $("resTitle").textContent = `Results (${list.length})`;
+        $("resultsGrid").innerHTML = list.length ? list.map(card).join("") : `<div class="empty">No matches. Try a different keyword, vibe, climate, or budget.</div>`;
+      }catch{
+        let list = placeholderDestinations.slice();
+        if (q) {
+          const qq = q.toLowerCase();
+          list = list.filter(d =>
+            (d.name||"").toLowerCase().includes(qq) ||
+            (d.city||"").toLowerCase().includes(qq) ||
+            (d.country||"").toLowerCase().includes(qq) ||
+            (d.summary||"").toLowerCase().includes(qq) ||
+            (d.tags||[]).some(t => (t||"").toLowerCase().includes(qq))
+          );
+        }
+        if (budget) list = list.filter(d => (d.budget||"") === budget);
+        if (vibe) list = list.filter(d => (d.vibe||"") === vibe);
+        if (climate) list = list.filter(d => (d.climateType||"").toLowerCase() === climate.toLowerCase());
+
+        $("resTitle").textContent = `Results (${list.length})`;
+        $("resultsGrid").innerHTML = list.length ? list.map(card).join("") : `<div class="empty">No matches. Try a different keyword, vibe, climate, or budget.</div>`;
+      }
+
+      attachSaveEvents();
+    }
+
+    function clearFilters(){
+      $("q").value = "";
+      $("climateHome").value = "";
+      $("budgetRange").value = 2;
+      selectedBudget = "mid";
+      $("budgetText").textContent = "££ Mid";
+      $("budgetHint").textContent = "Mid-range — £80–£160/day";
+      setVibe("");
+      loadFeatured("");
+    }
+
+    async function initialisePage() {
+      updateNav();
+      await loadFavouriteIds();
+
+      $("btnSearch").addEventListener("click", async () => {
+        if (isLoggedIn()) {
+          const q = $("q").value.trim();
+          const climate = $("climateHome").value.trim();
+          const vibe = selectedVibe;
+          const budget = selectedBudget;
+
+          const params = new URLSearchParams();
+          if (q) params.set("q", q);
+          if (climate) params.set("climate", climate);
+          if (vibe) params.set("vibe", vibe);
+          if (budget) params.set("budget", budget);
+
+          window.location.href = `/explore.html?${params.toString()}`;
+        } else {
+          await search();
+        }
+      });
+
+      $("btnClear").addEventListener("click", ()=>{
+        $("results").classList.remove("active");
+        $("resultsGrid").innerHTML = "";
+      });
+
+      $("btnClearFilters").addEventListener("click", clearFilters);
+
+      $("btnRefreshFeatured").addEventListener("click", ()=> loadFeatured(""));
+      $("btnRefreshAll").addEventListener("click", ()=>{
+        loadTrending();
+        loadFeatured("");
+      });
+
+      $("btnGetStarted").addEventListener("click", ()=> $("q").focus());
+
+      const getRecoBtn = $("btnGetRecommendations");
+      if (getRecoBtn) {
+        getRecoBtn.addEventListener("click", ()=> $("q").focus());
+      }
+
+      $("btnSeeHow").addEventListener("click", ()=> {
+        document.querySelector("#how").scrollIntoView({ behavior:"smooth" });
+      });
+
+      $("btnSeedHint").addEventListener("click", ()=> alert("Run: node seed.js (after setting .env MONGO_URI)"));
+      $("climateHome").addEventListener("change", () => loadFeatured(""));
+
+      $("year").textContent = new Date().getFullYear();
+      initVibeTags();
+      initBudget();
+      renderCategories();
+      loadTrending();
+      loadFeatured();
+    }
+
+    initialisePage();
+  </script>
+</body>
+</html>
