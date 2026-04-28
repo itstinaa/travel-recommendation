@@ -54,10 +54,7 @@ function renderCharts(users) {
   const roleChart = document.getElementById("roleChart");
   const growthChart = document.getElementById("growthChart");
 
-  if (!window.Chart || !roleChart || !growthChart) {
-    console.warn("Chart.js or chart canvas elements are missing.");
-    return;
-  }
+  if (!window.Chart || !roleChart || !growthChart) return;
 
   const admins = users.filter(u => u.role === "admin").length;
   const normalUsers = users.filter(u => u.role !== "admin").length;
@@ -130,7 +127,7 @@ function renderUsers(users) {
 
   usersDiv.innerHTML = users.length
     ? users.map(u => `
-      <div class="item-card">
+      <div class="item-card" id="user-card-${esc(u._id)}">
         <strong>${esc(u.email)}</strong>
 
         <span class="badge ${u.role === "admin" ? "admin" : ""}">
@@ -147,9 +144,132 @@ function renderUsers(users) {
         <p><strong>Trip Type:</strong> ${esc(u.preferences?.tripType || "Not set")}</p>
         <p><strong>Region:</strong> ${esc(u.preferences?.region || "Not set")}</p>
         <p><strong>Interests:</strong> ${esc((u.preferences?.interests || []).join(", ") || "None")}</p>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+          <button class="btn" onclick="showEditUserForm('${esc(u._id)}')">Edit User</button>
+          <button class="btn danger" onclick="deleteUser('${esc(u._id)}')">Delete User</button>
+        </div>
+
+        <div id="edit-box-${esc(u._id)}"></div>
       </div>
     `).join("")
     : "<p>No users found.</p>";
+}
+
+async function showEditUserForm(userId) {
+  const box = document.getElementById(`edit-box-${userId}`);
+  if (!box) return;
+
+  try {
+    const selectedUser = await apiFetch(`/admin/users/${userId}`, { auth: true });
+
+    box.innerHTML = `
+      <div style="margin-top:14px; padding:14px; border:1px solid #ddd; border-radius:12px; background:white;">
+        <h3>Edit User</h3>
+
+        <label>Email</label>
+        <input id="edit-email-${userId}" value="${esc(selectedUser.email)}">
+
+        <label>Role</label>
+        <select id="edit-role-${userId}">
+          <option value="user" ${selectedUser.role === "user" ? "selected" : ""}>user</option>
+          <option value="admin" ${selectedUser.role === "admin" ? "selected" : ""}>admin</option>
+        </select>
+
+        <label>Budget</label>
+        <select id="edit-budget-${userId}">
+          <option value="low" ${selectedUser.preferences?.budget === "low" ? "selected" : ""}>low</option>
+          <option value="mid" ${selectedUser.preferences?.budget === "mid" ? "selected" : ""}>mid</option>
+          <option value="high" ${selectedUser.preferences?.budget === "high" ? "selected" : ""}>high</option>
+        </select>
+
+        <label>Climate</label>
+        <input id="edit-climate-${userId}" value="${esc(selectedUser.preferences?.climate || "")}">
+
+        <label>Vibe</label>
+        <input id="edit-vibe-${userId}" value="${esc(selectedUser.preferences?.vibe || "")}">
+
+        <label>Trip Type</label>
+        <input id="edit-tripType-${userId}" value="${esc(selectedUser.preferences?.tripType || "")}">
+
+        <label>Region</label>
+        <input id="edit-region-${userId}" value="${esc(selectedUser.preferences?.region || "")}">
+
+        <label>Interests comma separated</label>
+        <input id="edit-interests-${userId}" value="${esc((selectedUser.preferences?.interests || []).join(", "))}">
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+          <button class="btn" onclick="updateUser('${userId}')">Save Changes</button>
+          <button class="btn danger" onclick="cancelEdit('${userId}')">Cancel</button>
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    box.innerHTML = `<p>${esc(err.message)}</p>`;
+  }
+}
+
+function cancelEdit(userId) {
+  const box = document.getElementById(`edit-box-${userId}`);
+  if (box) box.innerHTML = "";
+}
+
+async function updateUser(userId) {
+  const email = document.getElementById(`edit-email-${userId}`)?.value.trim();
+  const role = document.getElementById(`edit-role-${userId}`)?.value;
+
+  const budget = document.getElementById(`edit-budget-${userId}`)?.value;
+  const climate = document.getElementById(`edit-climate-${userId}`)?.value.trim();
+  const vibe = document.getElementById(`edit-vibe-${userId}`)?.value.trim();
+  const tripType = document.getElementById(`edit-tripType-${userId}`)?.value.trim();
+  const region = document.getElementById(`edit-region-${userId}`)?.value.trim();
+
+  const interestsText = document.getElementById(`edit-interests-${userId}`)?.value.trim() || "";
+  const interests = interestsText
+    ? interestsText.split(",").map(i => i.trim()).filter(Boolean)
+    : [];
+
+  try {
+    await apiFetch(`/admin/users/${userId}`, {
+      method: "PUT",
+      auth: true,
+      body: {
+        email,
+        role,
+        preferences: {
+          budget,
+          climate,
+          vibe,
+          tripType,
+          region,
+          interests
+        }
+      }
+    });
+
+    alert("User updated successfully.");
+    loadAdminDashboard();
+  } catch (err) {
+    alert(err.message || "Failed to update user.");
+  }
+}
+
+async function deleteUser(userId) {
+  if (!confirm("Are you sure you want to delete this user? This will also delete their favourites and history.")) {
+    return;
+  }
+
+  try {
+    await apiFetch(`/admin/users/${userId}`, {
+      method: "DELETE",
+      auth: true
+    });
+
+    alert("User deleted successfully.");
+    loadAdminDashboard();
+  } catch (err) {
+    alert(err.message || "Failed to delete user.");
+  }
 }
 
 function renderFavourites(favourites) {
@@ -202,8 +322,6 @@ async function loadAdminDashboard() {
     setMessage("Loading admin data...");
 
     const data = await apiFetch("/admin/dashboard", { auth: true });
-
-    console.log("ADMIN DATA:", data);
 
     const users = data.users || [];
     const favourites = data.favourites || [];
