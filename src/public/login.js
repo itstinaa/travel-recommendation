@@ -24,13 +24,31 @@ form?.addEventListener("submit", async (e) => {
       body: { email, password }
     });
 
+    // Save token
     setToken(data.token);
 
-    const redirectTo =
-      localStorage.getItem("pendingFavouriteRedirect") || "/explore.html";
+    // Save logged-in user details, including role
+    localStorage.setItem("user", JSON.stringify(data.user));
 
     setMessage("Login successful. Redirecting...");
-    window.location.href = redirectTo;
+
+    // Admin goes to admin dashboard
+    if (data.user?.role === "admin") {
+      window.location.href = "/admin.html";
+      return;
+    }
+
+    // If user was saving a favourite before login, send them back
+    const pendingRedirect = localStorage.getItem("pendingFavouriteRedirect");
+
+    if (pendingRedirect) {
+      window.location.href = pendingRedirect;
+      return;
+    }
+
+    // Normal users go to account dashboard
+    window.location.href = "/account.html";
+
   } catch (err) {
     setMessage(err.message || "Login failed.");
   }

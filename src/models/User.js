@@ -15,6 +15,12 @@ const userSchema = new mongoose.Schema(
       required: true
     },
 
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user"
+    },
+
     preferences: {
       budget: {
         type: String,
@@ -49,4 +55,3 @@ const userSchema = new mongoose.Schema(
 const User = mongoose.model("User", userSchema);
 
 export default User;
-

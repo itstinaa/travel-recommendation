@@ -32,9 +32,15 @@ router.post("/register", async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
+    const role =
+      normalizedEmail === "admin@email.com"
+        ? "admin"
+        : "user";
+
     const user = await User.create({
       email: normalizedEmail,
       passwordHash,
+      role,
       preferences: {
         budget: "mid",
         interests: [],
@@ -46,8 +52,8 @@ router.post("/register", async (req, res) => {
     });
 
     const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
+       { id: user._id, role: user.role },
+       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
 
@@ -57,6 +63,7 @@ router.post("/register", async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        role: user.role,
         preferences: user.preferences
       }
     });
@@ -106,6 +113,7 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        role: user.role,
         preferences: user.preferences
       }
     });

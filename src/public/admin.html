@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --danger: #dc2626;
+      --border: rgba(15, 23, 42, 0.1);
+      --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), #1d4ed8);
+      color: white;
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 { margin: 0; font-size: 28px; }
+    header p { margin: 6px 0 0; opacity: 0.9; }
+
+    .btn {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn.danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .status {
+      background: #e0f2fe;
+      color: #075985;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card,
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .stat-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 30px;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .section h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .grid-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .item-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      background: #f8fafc;
+    }
+
+    .item-card strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .badge.admin {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    pre {
+      background: #eef2ff;
+      padding: 10px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .stats,
+      .charts {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p>Manage users, destinations, favourites, and search history.</p>
+    </div>
+
+    <div>
+      <a href="/index.html" class="btn">Home</a>
+      <button class="btn danger" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="status" id="msg">Loading admin data...</div>
+
+    <section class="stats">
+      <div class="stat-card">
+        <span>Total Users</span>
+        <strong id="totalUsers">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Admin Accounts</span>
+        <strong id="totalAdmins">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Favourites</span>
+        <strong id="totalFavourites">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Destinations</span>
+        <strong id="totalDestinations">0</strong>
+      </div>
+    </section>
+
+    <section class="charts">
+      <div class="section">
+        <h2>User Role Overview</h2>
+        <canvas id="roleChart" height="160"></canvas>
+      </div>
+
+      <div class="section">
+        <h2>Account Growth</h2>
+        <canvas id="growthChart" height="160"></canvas>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>All Users</h2>
+      <p class="muted">View registered users and their preference data.</p>
+      <div id="users" class="grid-list"></div>
+    </section>
+
+    <section class="section">
+      <h2>Saved Favourites</h2>
+      <p class="muted">View destinations saved by users.</p>
+      <div id="favourites" class="grid-list"></div>
+    </section>
+
+    <section class="section">
+      <h2>Search History</h2>
+      <p class="muted">View user search activity.</p>
+      <div id="history" class="grid-list"></div>
+    </section>
+
+    <section class="section">
+      <h2>Destinations</h2>
+      <p class="muted">View destination records stored in the database.</p>
+      <div id="destinations" class="grid-list"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="api.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -9,6 +9,8 @@ import userRoutes from "./src/routes/user.routes.js";
 import favouriteRoutes from "./src/routes/favourite.routes.js";
 import historyRoutes from "./src/routes/history.routes.js";
 import recommendationRoutes from "./src/routes/recommendation.routes.js";
+import adminRoutes from "./src/routes/admin.routes.js";
+
 
 
 dotenv.config();
@@ -37,6 +39,7 @@ app.use("/user", userRoutes);
 app.use("/favourites", favouriteRoutes);
 app.use("/history", historyRoutes);
 app.use("/recommendations", recommendationRoutes);
+app.use("/admin", adminRoutes);
 
 // Default page
 app.get("/", (req, res) => {
