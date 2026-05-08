@@ -77,7 +77,7 @@ const destinationSchema = new mongoose.Schema(
     tripTypes: {
       type: [String],
       default: [],
-      set: (arr) =>
+      set: arr =>
         Array.isArray(arr)
           ? [...new Set(arr.map(v => String(v).trim().toLowerCase()).filter(Boolean))]
           : []
@@ -86,7 +86,7 @@ const destinationSchema = new mongoose.Schema(
     tags: {
       type: [String],
       default: [],
-      set: (tags) =>
+      set: tags =>
         Array.isArray(tags)
           ? [...new Set(tags.map(tag => String(tag).trim().toLowerCase()).filter(Boolean))]
           : []
@@ -95,7 +95,7 @@ const destinationSchema = new mongoose.Schema(
     categories: {
       type: [String],
       default: [],
-      set: (cats) =>
+      set: cats =>
         Array.isArray(cats)
           ? [...new Set(cats.map(cat => String(cat).trim().toLowerCase()).filter(Boolean))]
           : []

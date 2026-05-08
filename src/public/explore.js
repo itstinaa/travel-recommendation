@@ -13,9 +13,13 @@ function getQueryParams() {
   return new URLSearchParams(window.location.search);
 }
 
+function clean(value = "") {
+  return String(value).trim().toLowerCase();
+}
+
 function buildInterestsArray(interestsRaw) {
   return interestsRaw
-    ? interestsRaw.split(",").map((s) => s.trim()).filter(Boolean)
+    ? interestsRaw.split(",").map((s) => clean(s)).filter(Boolean)
     : [];
 }
 
@@ -23,19 +27,40 @@ function setMessage(text) {
   if (msg) msg.textContent = text;
 }
 
+function esc(value = "") {
+  return String(value).replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[c]));
+}
+
+function getSelectedRegionLabel(region) {
+  if (!region) return "";
+
+  const regionSelect = getEl("region");
+  const selectedOption = regionSelect?.querySelector(`option[value="${region}"]`);
+
+  return selectedOption?.textContent || region;
+}
+
 async function loadSavedPreferences() {
   try {
     const user = await apiFetch("/user/profile", { auth: true });
     const prefs = user.preferences || {};
 
-    if (prefs.budget && getEl("budget")) getEl("budget").value = prefs.budget;
+    if (prefs.budget && getEl("budget")) getEl("budget").value = clean(prefs.budget);
+
     if (prefs.interests && getEl("interests")) {
       getEl("interests").value = prefs.interests.join(", ");
     }
-    if (prefs.climate && getEl("climate")) getEl("climate").value = prefs.climate;
-    if (prefs.vibe && getEl("vibe")) getEl("vibe").value = prefs.vibe;
-    if (prefs.tripType && getEl("tripType")) getEl("tripType").value = prefs.tripType;
-    if (prefs.region && getEl("region")) getEl("region").value = prefs.region;
+
+    if (prefs.climate && getEl("climate")) getEl("climate").value = clean(prefs.climate);
+    if (prefs.vibe && getEl("vibe")) getEl("vibe").value = clean(prefs.vibe);
+    if (prefs.tripType && getEl("tripType")) getEl("tripType").value = clean(prefs.tripType);
+    if (prefs.region && getEl("region")) getEl("region").value = clean(prefs.region);
   } catch (err) {
     console.error("Could not load saved preferences:", err.message);
   }
@@ -45,11 +70,11 @@ function loadQueryParamsIntoForm() {
   const params = getQueryParams();
 
   const q = params.get("q") || "";
-  const climate = params.get("climate") || "";
-  const vibe = params.get("vibe") || "";
-  const budget = params.get("budget") || "";
-  const tripType = params.get("tripType") || "";
-  const region = params.get("region") || "";
+  const climate = clean(params.get("climate") || "");
+  const vibe = clean(params.get("vibe") || "");
+  const budget = clean(params.get("budget") || "");
+  const tripType = clean(params.get("tripType") || "");
+  const region = clean(params.get("region") || "");
 
   if (q && getEl("interests")) getEl("interests").value = q;
   if (climate && getEl("climate")) getEl("climate").value = climate;
@@ -63,14 +88,15 @@ async function submitRecommendationSearch() {
   setMessage("Loading recommendations...");
   if (resultsDiv) resultsDiv.innerHTML = "";
 
-  const budget = getEl("budget")?.value || "";
-  const interestsRaw = getEl("interests")?.value.trim() || "";
-  const climate = getEl("climate")?.value.trim() || "";
-  const vibe = getEl("vibe")?.value || "";
-  const tripType = getEl("tripType")?.value || "";
-  const region = getEl("region")?.value || "";
+  const budget = clean(getEl("budget")?.value || "");
+  const interestsRaw = getEl("interests")?.value || "";
+  const climate = clean(getEl("climate")?.value || "");
+  const vibe = clean(getEl("vibe")?.value || "");
+  const tripType = clean(getEl("tripType")?.value || "");
+  const region = clean(getEl("region")?.value || "");
 
   const interests = buildInterestsArray(interestsRaw);
+  const regionLabel = getSelectedRegionLabel(region);
 
   try {
     const data = await apiFetch("/recommendations", {
@@ -87,17 +113,77 @@ async function submitRecommendationSearch() {
     });
 
     const results = data.results || [];
-    setMessage(`Showing top ${results.length} destinations`);
+
+    if (region && results.length) {
+      setMessage(`Showing ${results.length} destinations in ${regionLabel}`);
+    } else if (region && !results.length) {
+      setMessage(`No destinations found in ${regionLabel}. Try another region or add more destinations.`);
+    } else if (!results.length) {
+      setMessage("No recommendations found. Try changing your filters.");
+    } else {
+      setMessage(`Showing top ${results.length} destinations`);
+    }
+
     renderRecommendations(results);
   } catch (err) {
     setMessage(err.message || "Failed to load recommendations.");
-    if (resultsDiv) resultsDiv.innerHTML = "<p>Could not load recommendations.</p>";
+
+    if (resultsDiv) {
+      resultsDiv.innerHTML = "<p>Could not load recommendations.</p>";
+    }
+  }
+}
+
+async function loadDestinationInfo(destinationId, box) {
+  if (!box) return;
+
+  box.innerHTML = "<p>Loading destination information...</p>";
+
+  try {
+    const data = await apiFetch(`/wikimedia/destination/${destinationId}`);
+
+    const summary = data.summary;
+
+    if (!summary) {
+      box.innerHTML = "<p>No destination information found.</p>";
+      return;
+    }
+
+    box.innerHTML = `
+      <div class="wiki-card">
+        ${
+          summary.image
+            ? `<img src="${esc(summary.image)}" alt="${esc(summary.title)}">`
+            : ""
+        }
+
+        <h4>${esc(summary.title)}</h4>
+
+        ${
+          summary.description
+            ? `<p><strong>${esc(summary.description)}</strong></p>`
+            : ""
+        }
+
+        <p>${esc(summary.extract)}</p>
+
+        ${
+          summary.pageUrl
+            ? `<a href="${esc(summary.pageUrl)}" target="_blank">Read more on Wikipedia</a>`
+            : ""
+        }
+      </div>
+    `;
+  } catch (err) {
+    box.innerHTML = `<p>${esc(err.message || "Failed to load destination information.")}</p>`;
   }
 }
 
 async function autoSearchFromQueryParams() {
   const params = getQueryParams();
+
   if (!params.toString()) return;
+
   await submitRecommendationSearch();
 }
 
@@ -125,11 +211,11 @@ async function savePendingFavouriteAfterLogin() {
   } catch (err) {
     console.error("Pending favourite save failed:", err.message);
 
-    // If it was already saved, clear pending state anyway
     if ((err.message || "").toLowerCase().includes("already")) {
       localStorage.removeItem("pendingFavouriteId");
       localStorage.removeItem("pendingFavouriteSource");
       localStorage.removeItem("pendingFavouriteRedirect");
+
       setMessage("Destination was already in favourites.");
     }
   }
@@ -149,25 +235,60 @@ function renderRecommendations(destinations = []) {
     const card = document.createElement("div");
     card.className = "resultCard";
 
+    const tags = Array.isArray(d.tags) ? d.tags : [];
+
     const whyHtml = d.why
-      ? `<p><strong>Why recommended:</strong> ${d.why}</p>`
+      ? `<p><strong>Why recommended:</strong> ${esc(d.why)}</p>`
       : `<p><strong>Why recommended:</strong> Based on your selected preferences.</p>`;
 
+    const tagHtml = tags.length
+      ? `<div class="tagRow">${tags.map(tag => `<span class="tag">${esc(tag)}</span>`).join("")}</div>`
+      : `<p><strong>Tags:</strong> -</p>`;
+
     card.innerHTML = `
-      <h3>${d.name}, ${d.country}</h3>
-      <p><strong>Region:</strong> ${d.region || "-"}</p>
-      <p><strong>Budget:</strong> ${d.budget || "-"}</p>
-      <p><strong>Vibe:</strong> ${d.vibe || "-"}</p>
-      <p><strong>Climate:</strong> ${d.climateType || "-"}</p>
-      <p><strong>Tags:</strong> ${(d.tags || []).join(", ") || "-"}</p>
-      <p><strong>Match score:</strong> ${d.score ?? "?"}</p>
+      <h3>${esc(d.name)}, ${esc(d.country)}</h3>
+
+      <p><strong>Region:</strong> ${esc(d.region || "-")}</p>
+      <p><strong>Budget:</strong> ${esc(d.budget || "-")}</p>
+      <p><strong>Vibe:</strong> ${esc(d.vibe || "-")}</p>
+      <p><strong>Climate:</strong> ${esc(d.climateType || "-")}</p>
+
+      ${tagHtml}
+
+      <p><strong>Match score:</strong> ${esc(d.score ?? "?")}</p>
       ${whyHtml}
-      <button class="smallBtn favBtn">Save to favourites</button>
+
+      <div class="resultActions">
+        <button class="smallBtn favBtn">Save to favourites</button>
+        <button class="smallBtn secondary infoBtn">View destination info</button>
+      </div>
+
+      <div class="wikiBox"></div>
       <p class="status"></p>
     `;
 
     const favBtn = card.querySelector(".favBtn");
+    const infoBtn = card.querySelector(".infoBtn");
+    const wikiBox = card.querySelector(".wikiBox");
     const status = card.querySelector(".status");
+
+    infoBtn?.addEventListener("click", async () => {
+      if (!wikiBox) return;
+
+      const isOpen = wikiBox.dataset.open === "true";
+
+      if (isOpen) {
+        wikiBox.innerHTML = "";
+        wikiBox.dataset.open = "false";
+        infoBtn.textContent = "View destination info";
+        return;
+      }
+
+      wikiBox.dataset.open = "true";
+      infoBtn.textContent = "Hide destination info";
+
+      await loadDestinationInfo(d._id, wikiBox);
+    });
 
     favBtn?.addEventListener("click", async () => {
       const token = getToken();
@@ -181,9 +302,11 @@ function renderRecommendations(destinations = []) {
         );
 
         if (status) status.textContent = "Please log in to save this destination.";
+
         setTimeout(() => {
           window.location.href = "/login.html";
         }, 700);
+
         return;
       }
 
@@ -197,10 +320,13 @@ function renderRecommendations(destinations = []) {
         });
 
         if (status) status.textContent = "Saved ✅";
+
         favBtn.disabled = true;
         favBtn.textContent = "Saved";
       } catch (err) {
-        if (status) status.textContent = err.message || "Failed to save favourite.";
+        if (status) {
+          status.textContent = err.message || "Failed to save favourite.";
+        }
       }
     });
 
@@ -210,9 +336,11 @@ function renderRecommendations(destinations = []) {
 
 logoutBtn?.addEventListener("click", () => {
   clearToken();
+
   localStorage.removeItem("pendingFavouriteId");
   localStorage.removeItem("pendingFavouriteSource");
   localStorage.removeItem("pendingFavouriteRedirect");
+
   window.location.href = "/login.html";
 });
 

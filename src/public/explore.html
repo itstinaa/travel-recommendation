@@ -1,256 +1,341 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Explore • Smart Travel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explore Destinations</title>
 
   <style>
-    :root{
-      --bg:#f5f7fb;
-      --card:#ffffff;
-      --text:#0f172a;
-      --muted:#64748b;
-      --border:rgba(15,23,42,.12);
-      --primary:#2563eb;
-      --primary2:#1d4ed8;
-      --ring:0 0 0 4px rgba(37,99,235,.18);
-      --shadow:0 18px 40px rgba(15,23,42,.10);
-      --r:20px;
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --danger: #dc2626;
+      --border: rgba(15, 23, 42, 0.12);
+      --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
     }
 
-    *{box-sizing:border-box}
-
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-      background:var(--bg);
-      color:var(--text);
-      min-height:100vh;
+    * {
+      box-sizing: border-box;
     }
 
-    header{
-      background:#fff;
-      border-bottom:1px solid var(--border);
-      padding:14px 24px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight:950;
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .logo{
-      width:36px;
-      height:36px;
-      border-radius:12px;
-      background:linear-gradient(135deg,var(--primary),#60a5fa);
-      display:grid;
-      place-items:center;
-      color:#fff;
-      font-weight:900;
+    header h1 {
+      margin: 0;
+      font-size: 28px;
     }
 
-    .btn{
-      padding:8px 14px;
-      border-radius:999px;
-      border:none;
-      cursor:pointer;
-      font-weight:900;
+    header p {
+      margin: 6px 0 0;
+      opacity: 0.9;
     }
 
-    .btn.primary{
-      background:linear-gradient(135deg,var(--primary),var(--primary2));
-      color:#fff;
-      box-shadow:0 12px 24px rgba(37,99,235,.25);
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .btn.secondary{
-      background:#fff;
-      border:1px solid var(--border);
+    .btn,
+    .smallBtn {
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+      border-radius: 999px;
     }
 
-    main{
-      max-width:1000px;
-      margin:30px auto;
-      padding:0 20px;
+    .btn {
+      background: white;
+      color: var(--primary);
+      padding: 10px 16px;
     }
 
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
-      padding:20px;
-      margin-bottom:20px;
+    .btn.danger {
+      background: var(--danger);
+      color: white;
     }
 
-    h2{
-      margin-top:0;
-      letter-spacing:-.3px;
+    .smallBtn {
+      background: var(--primary);
+      color: white;
+      padding: 9px 14px;
+      font-size: 14px;
     }
 
-    label{
-      display:block;
-      margin-top:14px;
-      font-size:13px;
-      font-weight:900;
-      color:rgba(15,23,42,.75);
+    .smallBtn.secondary {
+      background: #e0e7ff;
+      color: #1e40af;
     }
 
-    select, input{
-      width:100%;
-      padding:10px 12px;
-      margin-top:6px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      font-size:14px;
+    .smallBtn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
     }
 
-    select:focus, input:focus{
-      outline:none;
-      border-color:rgba(37,99,235,.55);
-      box-shadow:var(--ring);
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
     }
 
-    #msg{
-      margin-top:14px;
-      font-size:14px;
-      color:var(--muted);
-      min-height:18px;
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+      align-items: start;
     }
 
-    #results{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-      gap:16px;
-      margin-top:20px;
+    .panel,
+    .resultCard {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
     }
 
-    .resultCard{
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:14px;
-      background:#fff;
+    .panel {
+      padding: 20px;
+      position: sticky;
+      top: 20px;
     }
 
-    .resultCard h3{
-      margin:0 0 6px;
+    .panel h2 {
+      margin-top: 0;
     }
 
-    .smallBtn{
-      margin-top:8px;
-      padding:6px 10px;
-      font-size:12px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#f8fafc;
-      cursor:pointer;
-      font-weight:900;
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 14px 0 6px;
+      font-size: 14px;
     }
 
-    footer{
-      text-align:center;
-      margin:40px 0;
-      font-size:13px;
-      color:var(--muted);
+    input,
+    select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+    }
+
+    .statusBox {
+      background: #e0f2fe;
+      color: #075985;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      font-weight: bold;
+    }
+
+    .results {
+      display: grid;
+      gap: 16px;
+    }
+
+    .resultCard {
+      padding: 20px;
+    }
+
+    .resultCard h3 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+
+    .resultCard p {
+      line-height: 1.5;
+    }
+
+    .muted,
+    .status {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .resultActions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .tagRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .tag {
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .wikiBox {
+      margin-top: 14px;
+    }
+
+    .wiki-card {
+      background: #f8fafc;
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .wiki-card img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .wiki-card h4 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .wiki-card p {
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .wiki-card a {
+      color: #2563eb;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    @media (max-width: 900px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        position: static;
+      }
     }
   </style>
 </head>
 
 <body>
+  <header>
+    <div>
+      <h1>Explore Destinations</h1>
+      <p>Get personalised travel recommendations based on your preferences.</p>
+    </div>
 
-<header>
-  <div class="brand">
-    <div class="logo">✈</div>
-    Smart Travel
-  </div>
+    <div class="header-actions">
+      <a href="/index.html" class="btn">Home</a>
+      <a href="/account.html" class="btn">Account</a>
+      <button class="btn danger" id="logoutBtn">Logout</button>
+    </div>
+  </header>
 
-  <div>
-    <button class="btn secondary" onclick="window.location.href='/account.html'">
-      My Account
-    </button>
-    <button class="btn primary" id="logoutBtn">
-      Logout
-    </button>
-  </div>
-</header>
+  <main class="container">
+    <div class="statusBox" id="msg">Choose your preferences to get recommendations.</div>
 
-<main>
+    <div class="layout">
+      <section class="panel">
+        <h2>Your Travel Preferences</h2>
 
-  <div class="card">
-    <h2>Get Personalised Recommendations</h2>
+        <form id="prefsForm">
+          <label for="budget">Budget</label>
+          <select id="budget">
+            <option value="">Any budget</option>
+            <option value="low">Low</option>
+            <option value="mid">Mid</option>
+            <option value="high">High</option>
+          </select>
 
-    <form id="prefsForm">
+          <label for="region">Region</label>
+          <select id="region">
+            <option value="">Any region</option>
+            <option value="africa">Africa</option>
+            <option value="americas">Americas</option>
+            <option value="asia">Asia</option>
+            <option value="europe">Europe</option>
+            <option value="oceania">Oceania</option>
+          </select>
 
-      <label>Budget</label>
-      <select id="budget">
-        <option value="low">Low</option>
-        <option value="mid" selected>Medium</option>
-        <option value="high">High</option>
-      </select>
+          <label for="climate">Climate</label>
+          <input id="climate" placeholder="e.g. sunny, cold, tropical, temperate">
 
-      <label>Interests (comma separated)</label>
-      <input id="interests" placeholder="culture, food, nature" />
+          <label for="vibe">Vibe</label>
+          <select id="vibe">
+            <option value="">Any vibe</option>
+            <option value="beach">Beach</option>
+            <option value="city">City</option>
+            <option value="adventure">Adventure</option>
+            <option value="nature">Nature</option>
+            <option value="luxury">Luxury</option>
+            <option value="romantic">Romantic</option>
+            <option value="cultural">Cultural</option>
+            <option value="relaxation">Relaxation</option>
+            <option value="food">Food</option>
+          </select>
 
-      <label>Climate (optional)</label>
-      <input id="climate" placeholder="sunny, cold, tropical..." />
+          <label for="tripType">Trip Type</label>
+          <select id="tripType">
+            <option value="">Any trip type</option>
+            <option value="solo">Solo</option>
+            <option value="couple">Couple</option>
+            <option value="family">Family</option>
+            <option value="friends">Friends</option>
+          </select>
 
-      <label>Vibe</label>
-      <select id="vibe">
-        <option value="">Any</option>
-        <option value="beach">Beach</option>
-        <option value="city">City</option>
-        <option value="cultural">Cultural</option>
-        <option value="food">Food</option>
-        <option value="nature">Nature</option>
-        <option value="adventure">Adventure</option>
-        <option value="relaxation">Relaxation</option>
-      </select>
+          <label for="interests">Interests</label>
+          <input id="interests" placeholder="e.g. food, culture, beaches, museums">
 
-      <label>Trip Type</label>
-      <select id="tripType">
-        <option value="">Any</option>
-        <option value="solo">Solo</option>
-        <option value="couple">Couple</option>
-        <option value="family">Family</option>
-        <option value="friends">Friends</option>
-      </select>
+          <button type="submit" class="smallBtn" style="margin-top:16px; width:100%;">
+            Find Recommendations
+          </button>
+        </form>
+      </section>
 
-      <label>Region</label>
-      <select id="region">
-        <option value="">Any</option>
-        <option value="africa">Africa</option>
-        <option value="americas">Americas</option>
-        <option value="asia">Asia</option>
-        <option value="europe">Europe</option>
-        <option value="oceania">Oceania</option>
-      </select>
+      <section>
+        <div id="results" class="results"></div>
+      </section>
+    </div>
+  </main>
 
-      <button type="submit" class="btn primary" style="margin-top:18px;">
-        Find Places
-      </button>
-
-    </form>
-
-    <p id="msg"></p>
-  </div>
-
-  <div id="results"></div>
-
-</main>
-
-<footer>
-  © Smart Travel • Personalised Travel Recommendation System
-</footer>
-
-<script src="api.js"></script>
-<script src="explore.js"></script>
-
+  <script src="api.js"></script>
+  <script src="explore.js"></script>
 </body>
 </html>

@@ -11,6 +11,9 @@ const logoutBtn = document.getElementById("logoutBtn");
 let roleChartInstance = null;
 let growthChartInstance = null;
 
+let allUsers = [];
+let allHistory = [];
+
 function setMessage(text) {
   if (msg) msg.textContent = text;
 }
@@ -28,6 +31,23 @@ function esc(value = "") {
     '"': "&quot;",
     "'": "&#039;"
   }[c]));
+}
+
+function formatDate(dateValue) {
+  if (!dateValue) return "Unknown";
+  return new Date(dateValue).toLocaleString("en-GB");
+}
+
+function formatQuery(query) {
+  if (!query) return "No search data";
+
+  if (typeof query === "string") {
+    return query;
+  }
+
+  return Object.entries(query)
+    .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`)
+    .join(" | ");
 }
 
 if (!token) {
@@ -125,35 +145,78 @@ function renderCharts(users) {
 function renderUsers(users) {
   if (!usersDiv) return;
 
-  usersDiv.innerHTML = users.length
-    ? users.map(u => `
-      <div class="item-card" id="user-card-${esc(u._id)}">
-        <strong>${esc(u.email)}</strong>
+  if (!users.length) {
+    usersDiv.innerHTML = `
+      <tr>
+        <td colspan="6">No users found.</td>
+      </tr>
+    `;
+    return;
+  }
 
-        <span class="badge ${u.role === "admin" ? "admin" : ""}">
+  usersDiv.innerHTML = users.map(u => `
+    <tr id="user-row-${esc(u._id)}">
+      <td>
+        <strong>${esc(u.email || "No email")}</strong>
+        <div class="muted">ID: ${esc(u._id || "Unknown")}</div>
+      </td>
+
+      <td>
+        <span class="badge ${u.role === "admin" ? "admin" : "user"}">
           ${esc(u.role || "user")}
         </span>
+      </td>
 
-        <p class="muted">
-          Created: ${u.createdAt ? new Date(u.createdAt).toLocaleString() : "Unknown"}
-        </p>
+      <td>${formatDate(u.createdAt)}</td>
 
-        <p><strong>Budget:</strong> ${esc(u.preferences?.budget || "Not set")}</p>
-        <p><strong>Climate:</strong> ${esc(u.preferences?.climate || "Not set")}</p>
-        <p><strong>Vibe:</strong> ${esc(u.preferences?.vibe || "Not set")}</p>
-        <p><strong>Trip Type:</strong> ${esc(u.preferences?.tripType || "Not set")}</p>
-        <p><strong>Region:</strong> ${esc(u.preferences?.region || "Not set")}</p>
-        <p><strong>Interests:</strong> ${esc((u.preferences?.interests || []).join(", ") || "None")}</p>
+      <td>
+        <strong>Budget:</strong> ${esc(u.preferences?.budget || "Not set")}<br>
+        <strong>Climate:</strong> ${esc(u.preferences?.climate || "Not set")}<br>
+        <strong>Vibe:</strong> ${esc(u.preferences?.vibe || "Not set")}
+      </td>
 
-        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
-          <button class="btn" onclick="showEditUserForm('${esc(u._id)}')">Edit User</button>
-          <button class="btn danger" onclick="deleteUser('${esc(u._id)}')">Delete User</button>
+      <td>
+        <strong>Trip:</strong> ${esc(u.preferences?.tripType || "Not set")}<br>
+        <strong>Region:</strong> ${esc(u.preferences?.region || "Not set")}<br>
+        <strong>Interests:</strong> ${esc((u.preferences?.interests || []).join(", ") || "None")}
+      </td>
+
+      <td>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn" onclick="showEditUserForm('${esc(u._id)}')">Edit</button>
+          <button class="btn danger" onclick="deleteUser('${esc(u._id)}')">Delete</button>
         </div>
+      </td>
+    </tr>
 
+    <tr>
+      <td colspan="6">
         <div id="edit-box-${esc(u._id)}"></div>
-      </div>
-    `).join("")
-    : "<p>No users found.</p>";
+      </td>
+    </tr>
+  `).join("");
+}
+
+function filterUsers() {
+  const searchInput = document.getElementById("userSearch");
+  const search = searchInput ? searchInput.value.toLowerCase() : "";
+
+  const filtered = allUsers.filter(u => {
+    const text = `
+      ${u.email || ""}
+      ${u.role || ""}
+      ${u.preferences?.budget || ""}
+      ${u.preferences?.climate || ""}
+      ${u.preferences?.vibe || ""}
+      ${u.preferences?.tripType || ""}
+      ${u.preferences?.region || ""}
+      ${(u.preferences?.interests || []).join(" ")}
+    `.toLowerCase();
+
+    return text.includes(search);
+  });
+
+  renderUsers(filtered);
 }
 
 async function showEditUserForm(userId) {
@@ -164,7 +227,7 @@ async function showEditUserForm(userId) {
     const selectedUser = await apiFetch(`/admin/users/${userId}`, { auth: true });
 
     box.innerHTML = `
-      <div style="margin-top:14px; padding:14px; border:1px solid #ddd; border-radius:12px; background:white;">
+      <div style="margin-top:14px; padding:16px; border:1px solid #ddd; border-radius:12px; background:white;">
         <h3>Edit User</h3>
 
         <label>Email</label>
@@ -278,27 +341,66 @@ function renderFavourites(favourites) {
   favouritesDiv.innerHTML = favourites.length
     ? favourites.map(f => `
       <div class="item-card">
-        <strong>User: ${esc(f.userId?.email || "Unknown user")}</strong>
-        <p>Destination: ${esc(f.destinationId?.name || "Unknown destination")}</p>
-        <p class="muted">Country: ${esc(f.destinationId?.country || "")}</p>
-        <p class="muted">Saved: ${f.createdAt ? new Date(f.createdAt).toLocaleString() : "Unknown"}</p>
+        <div class="item-card-row">
+          <div>
+            <strong>${esc(f.destinationId?.name || "Unknown destination")}</strong>
+            <p class="muted">${esc(f.destinationId?.country || "Unknown country")}</p>
+            <p>User: ${esc(f.userId?.email || "Unknown user")}</p>
+          </div>
+
+          <span class="badge">Saved</span>
+        </div>
+
+        <p class="muted">Saved: ${formatDate(f.createdAt)}</p>
       </div>
     `).join("")
-    : "<p>No favourites found.</p>";
+    : `<div class="empty">No favourites found.</div>`;
 }
 
 function renderHistory(history) {
   if (!historyDiv) return;
 
-  historyDiv.innerHTML = history.length
-    ? history.map(h => `
-      <div class="item-card">
-        <strong>User: ${esc(h.userId?.email || "Unknown user")}</strong>
-        <p class="muted">Created: ${h.createdAt ? new Date(h.createdAt).toLocaleString() : "Unknown"}</p>
-        <pre>${esc(JSON.stringify(h.query || {}, null, 2))}</pre>
-      </div>
-    `).join("")
-    : "<p>No search history found.</p>";
+  if (!history.length) {
+    historyDiv.innerHTML = `
+      <tr>
+        <td colspan="3">No search history found.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  historyDiv.innerHTML = history.map(h => `
+    <tr>
+      <td>
+        <strong>${esc(h.userId?.email || "Unknown user")}</strong>
+      </td>
+
+      <td>
+        ${esc(formatQuery(h.query))}
+      </td>
+
+      <td>
+        ${formatDate(h.createdAt)}
+      </td>
+    </tr>
+  `).join("");
+}
+
+function filterHistory() {
+  const searchInput = document.getElementById("historySearch");
+  const search = searchInput ? searchInput.value.toLowerCase() : "";
+
+  const filtered = allHistory.filter(h => {
+    const text = `
+      ${h.userId?.email || ""}
+      ${formatQuery(h.query)}
+      ${h.createdAt || ""}
+    `.toLowerCase();
+
+    return text.includes(search);
+  });
+
+  renderHistory(filtered);
 }
 
 function renderDestinations(destinations) {
@@ -307,14 +409,30 @@ function renderDestinations(destinations) {
   destinationsDiv.innerHTML = destinations.length
     ? destinations.map(d => `
       <div class="item-card">
-        <strong>${esc(d.name || "Unnamed destination")}</strong>
-        <p>${esc(d.country || "")}</p>
-        <p class="muted">
-          ${esc(d.vibe || "any")} | ${esc(d.budget || "any")} | ${esc(d.climateType || "any")}
-        </p>
+        <div class="item-card-row">
+          <div>
+            <strong>${esc(d.name || "Unnamed destination")}</strong>
+            <p>${esc(d.country || "")}</p>
+            <p class="muted">
+              ${esc(d.vibe || "any")} | 
+              ${esc(d.budget || "any")} | 
+              ${esc(d.climateType || "any")}
+            </p>
+          </div>
+
+          <span class="badge">${esc(d.region || "Destination")}</span>
+        </div>
       </div>
     `).join("")
-    : "<p>No destinations found.</p>";
+    : `<div class="empty">No destinations found.</div>`;
+}
+
+function setupFilters() {
+  const userSearch = document.getElementById("userSearch");
+  const historySearch = document.getElementById("historySearch");
+
+  userSearch?.addEventListener("input", filterUsers);
+  historySearch?.addEventListener("input", filterHistory);
 }
 
 async function loadAdminDashboard() {
@@ -327,6 +445,9 @@ async function loadAdminDashboard() {
     const favourites = data.favourites || [];
     const history = data.history || [];
     const destinations = data.destinations || [];
+
+    allUsers = users;
+    allHistory = history;
 
     setText("totalUsers", users.length);
     setText("totalAdmins", users.filter(u => u.role === "admin").length);
@@ -346,4 +467,5 @@ async function loadAdminDashboard() {
   }
 }
 
+setupFilters();
 loadAdminDashboard();

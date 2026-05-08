@@ -18,38 +18,40 @@ function requireAuthOrRedirect() {
 }
 
 async function apiFetch(path, options = {}) {
-  const {
-    method = "GET",
-    body,
-    auth = false,
-    headers = {}
-  } = options;
+  const token = getToken();
 
-  const finalHeaders = {
-    ...headers
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {})
   };
 
-  if (body !== undefined) {
-    finalHeaders["Content-Type"] = "application/json";
+  if (options.auth && token) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  if (auth) {
-    const token = getToken();
-    if (token) {
-      finalHeaders["Authorization"] = `Bearer ${token}`;
-    }
-  }
-
-  const res = await fetch(path, {
-    method,
-    headers: finalHeaders,
-    body: body !== undefined ? JSON.stringify(body) : undefined
+  const response = await fetch(path, {
+    method: options.method || "GET",
+    headers,
+    body: options.body ? JSON.stringify(options.body) : undefined
   });
 
-  const data = await res.json().catch(() => ({}));
+  const text = await response.text();
 
-  if (!res.ok) {
-    throw new Error(data.error || "Request failed");
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { error: text };
+  }
+
+  if (!response.ok) {
+    console.error("API ERROR:", {
+      path,
+      status: response.status,
+      data
+    });
+
+    throw new Error(data.error || data.message || `Request failed with status ${response.status}`);
   }
 
   return data;

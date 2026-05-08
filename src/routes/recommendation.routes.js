@@ -7,8 +7,12 @@ import Favourite from "../models/Favourite.js";
 
 const router = express.Router();
 
+function clean(value = "") {
+  return String(value).trim().toLowerCase();
+}
+
 function normalizeArray(arr = []) {
-  return arr.map(item => String(item).trim().toLowerCase()).filter(Boolean);
+  return arr.map(item => clean(item)).filter(Boolean);
 }
 
 function buildPreferenceProfile(historyItems, favouriteDestinations) {
@@ -24,56 +28,32 @@ function buildPreferenceProfile(historyItems, favouriteDestinations) {
   const budgetCount = {};
   const regionCount = {};
 
-  // Favourites = strongest signal
   for (const fav of favouriteDestinations) {
     const d = fav.destinationId;
     if (!d) continue;
 
-    if (d.vibe) {
-      const vibe = d.vibe.toLowerCase();
-      vibeCount[vibe] = (vibeCount[vibe] || 0) + 3;
-    }
-
-    if (d.budget) {
-      const budget = d.budget.toLowerCase();
-      budgetCount[budget] = (budgetCount[budget] || 0) + 3;
-    }
-
-    if (d.region) {
-      const region = d.region.toLowerCase();
-      regionCount[region] = (regionCount[region] || 0) + 3;
-    }
+    if (d.vibe) vibeCount[clean(d.vibe)] = (vibeCount[clean(d.vibe)] || 0) + 3;
+    if (d.budget) budgetCount[clean(d.budget)] = (budgetCount[clean(d.budget)] || 0) + 3;
+    if (d.region) regionCount[clean(d.region)] = (regionCount[clean(d.region)] || 0) + 3;
 
     for (const tag of d.tags || []) {
-      const t = String(tag).toLowerCase();
+      const t = clean(tag);
       tagCount[t] = (tagCount[t] || 0) + 3;
     }
   }
 
-  // History = recent searches stronger than older searches
   historyItems.forEach((h, index) => {
     const weight = index < 5 ? 2 : 1;
     const q = h.query || {};
 
     for (const interest of q.interests || []) {
-      const t = String(interest).toLowerCase();
+      const t = clean(interest);
       tagCount[t] = (tagCount[t] || 0) + weight;
     }
 
-    if (q.region) {
-      const region = String(q.region).toLowerCase();
-      regionCount[region] = (regionCount[region] || 0) + weight;
-    }
-
-    if (q.vibe) {
-      const vibe = String(q.vibe).toLowerCase();
-      vibeCount[vibe] = (vibeCount[vibe] || 0) + weight;
-    }
-
-    if (q.budget) {
-      const budget = String(q.budget).toLowerCase();
-      budgetCount[budget] = (budgetCount[budget] || 0) + weight;
-    }
+    if (q.region) regionCount[clean(q.region)] = (regionCount[clean(q.region)] || 0) + weight;
+    if (q.vibe) vibeCount[clean(q.vibe)] = (vibeCount[clean(q.vibe)] || 0) + weight;
+    if (q.budget) budgetCount[clean(q.budget)] = (budgetCount[clean(q.budget)] || 0) + weight;
   });
 
   profile.favouriteVibes = Object.entries(vibeCount)
@@ -108,33 +88,29 @@ function scoreDestination(dest, prefs, profile) {
   const categories = normalizeArray(dest.categories);
   const tripTypes = normalizeArray(dest.tripTypes);
 
-  if (prefs.budget && dest.budget?.toLowerCase() === prefs.budget.toLowerCase()) {
+  if (prefs.budget && clean(dest.budget) === clean(prefs.budget)) {
     score += 4;
     reasons.push("matches your budget");
   }
 
-  if (prefs.vibe && dest.vibe?.toLowerCase() === prefs.vibe.toLowerCase()) {
+  if (prefs.vibe && clean(dest.vibe) === clean(prefs.vibe)) {
     score += 4;
     reasons.push("matches your preferred vibe");
   }
 
-  if (prefs.climate && dest.climateType?.toLowerCase() === prefs.climate.toLowerCase()) {
+  if (prefs.climate && clean(dest.climateType) === clean(prefs.climate)) {
     score += 3;
     reasons.push("matches your preferred climate");
   }
 
-  if (prefs.tripType && tripTypes.includes(prefs.tripType.toLowerCase())) {
+  if (prefs.tripType && tripTypes.includes(clean(prefs.tripType))) {
     score += 3;
     reasons.push("fits your trip type");
   }
 
-  if (
-    prefs.region &&
-    dest.region &&
-    dest.region.toLowerCase() === prefs.region.toLowerCase()
-  ) {
-    score += 4;
-    reasons.push(`you are looking in ${dest.region}`);
+  if (prefs.region && clean(dest.region) === clean(prefs.region)) {
+    score += 5;
+    reasons.push(`is in ${dest.region}`);
   }
 
   const matchedInterests = interests.filter(
@@ -152,25 +128,26 @@ function scoreDestination(dest, prefs, profile) {
 
   if (dest.popularity >= 85) {
     score += 1;
-    reasons.push("is a popular choice with travelers");
+    reasons.push("is a popular choice with travellers");
   }
 
-  if (profile.favouriteVibes.includes(dest.vibe?.toLowerCase())) {
+  if (profile.favouriteVibes.includes(clean(dest.vibe))) {
     score += 2;
     reasons.push("is similar to places you liked before");
   }
 
   const profileTagMatches = profile.favouriteTags.filter(tag => tags.includes(tag));
+
   if (profileTagMatches.length) {
     score += profileTagMatches.length;
     reasons.push("matches your saved favourites and past searches");
   }
 
-  if (profile.favouriteBudgets.includes(dest.budget?.toLowerCase())) {
+  if (profile.favouriteBudgets.includes(clean(dest.budget))) {
     score += 1;
   }
 
-  if (profile.favouriteRegions.includes(dest.region?.toLowerCase())) {
+  if (!prefs.region && profile.favouriteRegions.includes(clean(dest.region))) {
     score += 2;
     reasons.push("is in a region you often explore");
   }
@@ -178,21 +155,9 @@ function scoreDestination(dest, prefs, profile) {
   return { score, reasons };
 }
 
-function buildWhyText(dest, prefs, profile, reasons) {
-  if (
-    prefs.region &&
-    dest.region?.toLowerCase() === prefs.region.toLowerCase() &&
-    dest.vibe
-  ) {
-    return `Because you are looking in ${dest.region} and like ${dest.vibe} destinations.`;
-  }
-
-  if (
-    prefs.vibe &&
-    dest.vibe?.toLowerCase() === prefs.vibe.toLowerCase() &&
-    profile.favouriteRegions.includes(dest.region?.toLowerCase())
-  ) {
-    return `Because you like ${dest.vibe} destinations and often explore ${dest.region}.`;
+function buildWhyText(dest, prefs, reasons) {
+  if (prefs.region && clean(dest.region) === clean(prefs.region)) {
+    return `Because you selected ${dest.region}, and this destination matches your travel preferences.`;
   }
 
   if (reasons.length > 0) {
@@ -204,22 +169,23 @@ function buildWhyText(dest, prefs, profile, reasons) {
 
 router.post("/", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
+    const currentUser = await User.findById(req.user.id);
+
+    if (!currentUser) {
       return res.status(404).json({ error: "User not found" });
     }
 
     const { budget, interests, climate, vibe, tripType, region } = req.body;
 
     const prefs = {
-      budget: budget || user.preferences?.budget || "mid",
+      budget: clean(budget),
       interests: Array.isArray(interests)
-        ? interests
-        : user.preferences?.interests || [],
-      climate: climate || user.preferences?.climate || "",
-      vibe: vibe || user.preferences?.vibe || "",
-      tripType: tripType || user.preferences?.tripType || "",
-      region: region || user.preferences?.region || ""
+        ? interests.map(i => clean(i)).filter(Boolean)
+        : [],
+      climate: clean(climate),
+      vibe: clean(vibe),
+      tripType: clean(tripType),
+      region: clean(region)
     };
 
     await History.create({
@@ -245,52 +211,52 @@ router.post("/", auth, async (req, res) => {
         .filter(Boolean)
     );
 
-    const ranked = allDestinations
-      .map(d => {
-        const { score, reasons } = scoreDestination(d, prefs, profile);
+    const selectedRegion = clean(prefs.region);
+
+    let availableDestinations = allDestinations;
+
+    if (selectedRegion) {
+      availableDestinations = allDestinations.filter(destination =>
+        clean(destination.region) === selectedRegion
+      );
+    }
+
+    const ranked = availableDestinations
+      .map(destination => {
+        const { score, reasons } = scoreDestination(destination, prefs, profile);
+
         return {
-          ...d.toObject(),
+          ...destination.toObject(),
           score,
           reasons,
-          why: buildWhyText(d, prefs, profile, reasons)
+          why: buildWhyText(destination, prefs, reasons)
         };
       })
       .sort((a, b) => b.score - a.score);
 
     const seen = new Set();
 
-    let results = ranked.filter(d => {
-      const id = d._id?.toString();
-      const key = `${d.name}-${d.country}`.toLowerCase();
+    const results = ranked.filter(destination => {
+      const id = destination._id?.toString();
+      const key = `${destination.name}-${destination.country}`.toLowerCase();
 
       if (id && favouriteIds.has(id)) return false;
       if (seen.has(key)) return false;
-      if (d.score < 2) return false;
 
       seen.add(key);
       return true;
-    });
-
-    if (results.length < 5) {
-      const fallbackSeen = new Set();
-
-      results = ranked.filter(d => {
-        const id = d._id?.toString();
-        const key = `${d.name}-${d.country}`.toLowerCase();
-
-        if (id && favouriteIds.has(id)) return false;
-        if (fallbackSeen.has(key)) return false;
-
-        fallbackSeen.add(key);
-        return true;
-      });
-    }
+    }).slice(0, 10);
 
     return res.json({
       prefs,
       profile,
-      results: results.slice(0, 10)
+      selectedRegion,
+      results,
+      message: selectedRegion
+        ? `Showing destinations in ${selectedRegion}`
+        : "Showing destinations from all regions"
     });
+
   } catch (err) {
     console.error("RECOMMENDATION ERROR:", err);
     return res.status(500).json({ error: "Server error" });

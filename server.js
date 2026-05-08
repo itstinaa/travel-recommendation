@@ -1,8 +1,10 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import mongoose from "mongoose";
 import path from "path";
 import { fileURLToPath } from "url";
-import dotenv from "dotenv";
 
 import authRoutes from "./src/routes/auth.routes.js";
 import userRoutes from "./src/routes/user.routes.js";
@@ -10,10 +12,8 @@ import favouriteRoutes from "./src/routes/favourite.routes.js";
 import historyRoutes from "./src/routes/history.routes.js";
 import recommendationRoutes from "./src/routes/recommendation.routes.js";
 import adminRoutes from "./src/routes/admin.routes.js";
+import wikimediaRoutes from "./src/routes/wikimedia.routes.js";
 
-
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3005;
@@ -40,6 +40,7 @@ app.use("/favourites", favouriteRoutes);
 app.use("/history", historyRoutes);
 app.use("/recommendations", recommendationRoutes);
 app.use("/admin", adminRoutes);
+app.use("/wikimedia", wikimediaRoutes);
 
 // Default page
 app.get("/", (req, res) => {
