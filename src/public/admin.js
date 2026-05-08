@@ -35,7 +35,36 @@ function esc(value = "") {
 
 function formatDate(dateValue) {
   if (!dateValue) return "Unknown";
-  return new Date(dateValue).toLocaleString("en-GB");
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
+  }
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+function formatDateTime(dateValue) {
+  if (!dateValue) return "Unknown";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Unknown";
+  }
+
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 }
 
 function formatQuery(query) {
@@ -104,6 +133,9 @@ function renderCharts(users) {
     if (!u.createdAt) return;
 
     const date = new Date(u.createdAt);
+
+    if (Number.isNaN(date.getTime())) return;
+
     const month = date.toLocaleString("en-GB", {
       month: "short",
       year: "numeric"
@@ -231,7 +263,7 @@ async function showEditUserForm(userId) {
         <h3>Edit User</h3>
 
         <label>Email</label>
-        <input id="edit-email-${userId}" value="${esc(selectedUser.email)}">
+        <input id="edit-email-${userId}" value="${esc(selectedUser.email || "")}">
 
         <label>Role</label>
         <select id="edit-role-${userId}">
@@ -241,6 +273,7 @@ async function showEditUserForm(userId) {
 
         <label>Budget</label>
         <select id="edit-budget-${userId}">
+          <option value="" ${!selectedUser.preferences?.budget ? "selected" : ""}>Not set</option>
           <option value="low" ${selectedUser.preferences?.budget === "low" ? "selected" : ""}>low</option>
           <option value="mid" ${selectedUser.preferences?.budget === "mid" ? "selected" : ""}>mid</option>
           <option value="high" ${selectedUser.preferences?.budget === "high" ? "selected" : ""}>high</option>
@@ -351,7 +384,7 @@ function renderFavourites(favourites) {
           <span class="badge">Saved</span>
         </div>
 
-        <p class="muted">Saved: ${formatDate(f.createdAt)}</p>
+        <p class="muted">Saved: ${formatDateTime(f.createdAt)}</p>
       </div>
     `).join("")
     : `<div class="empty">No favourites found.</div>`;
@@ -380,7 +413,7 @@ function renderHistory(history) {
       </td>
 
       <td>
-        ${formatDate(h.createdAt)}
+        ${formatDateTime(h.createdAt)}
       </td>
     </tr>
   `).join("");

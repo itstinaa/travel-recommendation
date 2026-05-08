@@ -314,21 +314,24 @@
           </div>
         </div>
 
-        <input type="text" id="userSearch" placeholder="Search users by name, email, or role...">
+        <input type="text" id="userSearch" placeholder="Search users by email, role, or preferences...">
 
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>User</th>
-                <th>Email</th>
                 <th>Role</th>
+                <th>Joined</th>
                 <th>Preferences</th>
+                <th>Trip Details</th>
+                <th>Actions</th>
               </tr>
             </thead>
+
             <tbody id="users">
               <tr>
-                <td colspan="4">Loading users...</td>
+                <td colspan="6">Loading users...</td>
               </tr>
             </tbody>
           </table>
@@ -354,6 +357,7 @@
                 <th>Date</th>
               </tr>
             </thead>
+
             <tbody id="history">
               <tr>
                 <td colspan="3">Loading history...</td>
